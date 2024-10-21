@@ -30,6 +30,7 @@ TestResults/
 *.rar
 *.tar
 *.zip
+*.jfm
 
 # Logs and databases #
 ######################
@@ -43,3 +44,4 @@ TestResults/
 ehthumbs.db
 Icon?
 Thumbs.db
+/.vs/TUIO_CSHARP/v16/Server/sqlite3/db.lock

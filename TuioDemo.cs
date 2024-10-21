@@ -53,18 +53,18 @@ public class TuioDemo : Form, TuioListener
 	public string serverIP = "localhost"; // IP address of the Python server
 	public int port = 8000;               // Port number matching the Python server
 	int flag = 0;
-	Font font = new Font("Arial", 10.0f);
+	Font font = new Font("Arial", 15.0f);
 	SolidBrush fntBrush = new SolidBrush(Color.White);
-	SolidBrush bgrBrush = new SolidBrush(Color.FromArgb(0, 0, 64));
-	SolidBrush curBrush = new SolidBrush(Color.FromArgb(192, 0, 192));
-	SolidBrush objBrush = new SolidBrush(Color.FromArgb(64, 0, 0));
-	SolidBrush blbBrush = new SolidBrush(Color.FromArgb(64, 64, 64));
+	SolidBrush bgrBrush = new SolidBrush(Color.Black);
+	SolidBrush curBrush = new SolidBrush(Color.Yellow);
+	SolidBrush objBrush = new SolidBrush(Color.Red);
+	SolidBrush blbBrush = new SolidBrush(Color.Red);
 	Pen curPen = new Pen(new SolidBrush(Color.Blue), 1);
 	private string objectImagePath;
 	private string backgroundImagePath;
 	TcpClient client1;
 	NetworkStream stream;
-	string title = "kena";
+	string title = "PTRH-HCI";
 	string prevP = "";
 
 	private string selectedPatient;
@@ -245,6 +245,7 @@ public class TuioDemo : Form, TuioListener
 		// Getting the graphics object
 		Graphics g = pevent.Graphics;
 
+
 		// Draw the background
 		g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
 
@@ -274,18 +275,19 @@ public class TuioDemo : Form, TuioListener
 		// Draw the circular menu
 		int menuRadius = height / 4;  // Adjust size based on your design
 		Point center = new Point(width / 2, height / 2);
-		g.DrawEllipse(Pens.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
+		g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
 
 		// Draw arcs
 		for (int i = 0; i < 4; i++)
 		{
 			double angleStart = i * 90;
-			g.FillPie(Brushes.Gray, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
+			g.FillPie(Brushes.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
 		}
 
 		// Define patient names based on marker ID
 		string[] patientNamesMarker1 = { "Patient A1", "Patient B1", "Patient C1", "Patient D1" };
 		string[] patientNamesMarker2 = { "Patient A2", "Patient B2", "Patient C2", "Patient D2" };
+		string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
 
 		if (objectList.Count > 0)
 		{
@@ -299,48 +301,66 @@ public class TuioDemo : Form, TuioListener
 
 					// Calculate the distance from the center of the circle to the marker
 					double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
-					g.DrawString("" + tobj.Angle * (180.0 / Math.PI), font, Brushes.White, 0, 0);
 
-					
-						// Calculate the angle of the marker
-						double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
-						if (angle < 0) angle += 360; // Convert angle to 0-360 range
 
-						// Determine which arc the marker is in
-						int selectedQuadrant = (int)(angle / 90) % 4;
 
-						// Highlight the selected quadrant
-						g.FillPie(Brushes.Yellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
+					// Calculate the angle of the marker
+					double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
+					if (angle < 0) angle += 360; // Convert angle to 0-360 range
 
-						// Display patient names based on the marker ID
-						string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
-														tobj.SymbolID == 2 ? patientNamesMarker2 : null;
+					// Determine which arc the marker is in
+					int selectedQuadrant = (int)(angle / 90) % 4;
 
-						
-						
+					// Highlight the selected quadrant
+					g.FillPie(Brushes.Yellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
 
-						if (currentPatientNames != null)
+					// Display patient names based on the marker ID
+					string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
+													tobj.SymbolID == 2 ? patientNamesMarker2 :
+													tobj.SymbolID == 3 ? patientNamesMarker3 : null;
+
+
+
+
+					if (currentPatientNames != null)
+					{
+						selectedPatient = currentPatientNames[selectedQuadrant];
+
+						g.FillRectangle(new SolidBrush(Color.DeepSkyBlue), new Rectangle(0, 5, selectedPatient.Length * 11, 30));
+						g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
+									 new Point(0, 8));
+
+						if (flag > 0)
 						{
-							g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
-										 new Point(center.X - menuRadius / 2, center.Y - menuRadius / 2 + selectedQuadrant * 30));
-							selectedPatient = currentPatientNames[selectedQuadrant];
-
-							if ((tobj.Angle * (180.0 / Math.PI)  >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
+							g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, selectedPatient.Length * 18, 30));
+							g.DrawString(prevP + " selected", font, Brushes.White,
+										 new Point(230, 70));
+							flag++;
+							if (flag > 100)
 							{
-								if(prevP != selectedPatient)
-                                {
-
-									prevP = selectedPatient;
-									SendMarkerData(tobj);
-									
-								}
-								
+								flag = 0;
 							}
 
 						}
 
-						
-					
+
+						if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
+						{
+							if (prevP != selectedPatient)
+							{
+
+								prevP = selectedPatient;
+								flag = 1;
+								SendMarkerData(tobj);
+
+							}
+
+						}
+
+					}
+
+
+
 
 					// Existing object rendering logic
 					int ox = tobj.getScreenX(width);
@@ -441,6 +461,5 @@ public class TuioDemo : Form, TuioListener
 			Console.WriteLine("Exception: {0}", e);
 		}
 	}
-
 
 }
