@@ -1,13 +1,13 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "D:\\hci project\\",
+  "WorkspaceRootPath": "E:\\HCI\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{83F18314-A320-4148-A5A5-D8FD091FC407}|TUIO_DEMO.csproj|d:\\hci project\\tuiodemo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{83F18314-A320-4148-A5A5-D8FD091FC407}|TUIO_DEMO.csproj|e:\\hci\\tuiodemo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{83F18314-A320-4148-A5A5-D8FD091FC407}|TUIO_DEMO.csproj|solutionrelative:tuiodemo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{83F18314-A320-4148-A5A5-D8FD091FC407}|TUIO_DEMO.csproj|d:\\hci project\\tuiodemo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{83F18314-A320-4148-A5A5-D8FD091FC407}|TUIO_DEMO.csproj|e:\\hci\\tuiodemo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{83F18314-A320-4148-A5A5-D8FD091FC407}|TUIO_DEMO.csproj|solutionrelative:tuiodemo.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     }
   ],
@@ -24,25 +24,25 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "TuioDemo.cs",
-              "DocumentMoniker": "D:\\hci project\\TuioDemo.cs",
+              "DocumentMoniker": "E:\\HCI\\TuioDemo.cs",
               "RelativeDocumentMoniker": "TuioDemo.cs",
-              "ToolTip": "D:\\hci project\\TuioDemo.cs",
+              "ToolTip": "E:\\HCI\\TuioDemo.cs",
               "RelativeToolTip": "TuioDemo.cs",
-              "ViewState": "AQIAABUAAAAAAAAAAAAAAC4AAAAcAAAA",
+              "ViewState": "AgIAAHUAAAAAAAAAAAAYwAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-22T18:47:54.826Z",
+              "WhenOpened": "2024-10-22T19:16:37.207Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
               "Title": "TuioDemo.cs [Design]",
-              "DocumentMoniker": "D:\\hci project\\TuioDemo.cs",
+              "DocumentMoniker": "E:\\HCI\\TuioDemo.cs",
               "RelativeDocumentMoniker": "TuioDemo.cs",
-              "ToolTip": "D:\\hci project\\TuioDemo.cs [Design]",
+              "ToolTip": "E:\\HCI\\TuioDemo.cs [Design]",
               "RelativeToolTip": "TuioDemo.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-10-22T18:47:52.512Z",
+              "WhenOpened": "2024-10-22T19:16:35.399Z",
               "EditorCaption": " [Design]"
             }
           ]
