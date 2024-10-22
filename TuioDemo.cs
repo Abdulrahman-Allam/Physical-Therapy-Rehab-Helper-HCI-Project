@@ -53,7 +53,7 @@ public class TuioDemo : Form, TuioListener
 	SolidBrush fntBrush = new SolidBrush(Color.White);
 	SolidBrush bgrBrush = new SolidBrush(Color.Black);
 	SolidBrush curBrush = new SolidBrush(Color.Yellow);
-	SolidBrush objBrush = new SolidBrush(Color.Red);
+	SolidBrush objBrush = new SolidBrush(Color.Purple);
 	SolidBrush blbBrush = new SolidBrush(Color.Red);
 	Pen curPen = new Pen(new SolidBrush(Color.Blue), 1);
 	private string objectImagePath;
