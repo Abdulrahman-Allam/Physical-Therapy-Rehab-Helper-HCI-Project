@@ -308,7 +308,7 @@ public class TuioDemo : Form, TuioListener
 					int selectedQuadrant = (int)(angle / 90) % 4;
 
 					// Highlight the selected quadrant
-					g.FillPie(Brushes.Yellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
+					g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
 
 					// Display patient names based on the marker ID
 					string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
