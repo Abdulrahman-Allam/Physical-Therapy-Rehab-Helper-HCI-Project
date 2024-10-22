@@ -18,17 +18,13 @@
 */
 
 using System;
-using System.Drawing;
-using System.Windows.Forms;
-using System.ComponentModel;
 using System.Collections.Generic;
-using System.Collections;
-using System.Threading;
-using TUIO;
-using System.IO;
-using System.Drawing.Drawing2D;
+using System.ComponentModel;
+using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
+using System.Windows.Forms;
+using TUIO;
 
 
 
@@ -40,12 +36,12 @@ public class TuioDemo : Form, TuioListener
 	private Dictionary<long, TuioBlob> blobList;
 
 	public static int width, height;
-	private int window_width = 640;
-	private int window_height = 480;
-	private int window_left = 0;
-	private int window_top = 0;
 	private int screen_width = Screen.PrimaryScreen.Bounds.Width;
 	private int screen_height = Screen.PrimaryScreen.Bounds.Height;
+	private int w_top = 0;
+	private int w_width = 640;
+	private int w_height = 480;
+	private int w_left = 0;
 	public int prev_id = -1;
 	private bool fullscreen;
 	private bool verbose;
@@ -74,8 +70,8 @@ public class TuioDemo : Form, TuioListener
 
 		verbose = false;
 		fullscreen = false;
-		width = window_width;
-		height = window_height;
+		width = w_width;
+		height = w_height;
 
 		this.ClientSize = new System.Drawing.Size(width, height);
 		this.Name = "TuioDemo";
@@ -115,8 +111,8 @@ public class TuioDemo : Form, TuioListener
 				width = screen_width;
 				height = screen_height;
 
-				window_left = this.Left;
-				window_top = this.Top;
+				w_left = this.Left;
+				w_top = this.Top;
 
 				this.FormBorderStyle = FormBorderStyle.None;
 				this.Left = 0;
@@ -129,14 +125,14 @@ public class TuioDemo : Form, TuioListener
 			else
 			{
 
-				width = window_width;
-				height = window_height;
+				width = w_width;
+				height = w_height;
 
 				this.FormBorderStyle = FormBorderStyle.Sizable;
-				this.Left = window_left;
-				this.Top = window_top;
-				this.Width = window_width;
-				this.Height = window_height;
+				this.Left = w_left;
+				this.Top = w_top;
+				this.Width = w_width;
+				this.Height = w_height;
 
 				fullscreen = false;
 			}
@@ -285,8 +281,8 @@ public class TuioDemo : Form, TuioListener
 		}
 
 		// Define patient names based on marker ID
-		string[] patientNamesMarker1 = { "Patient A1", "Patient B1", "Patient C1", "Patient D1" };
-		string[] patientNamesMarker2 = { "Patient A2", "Patient B2", "Patient C2", "Patient D2" };
+		string[] patientNamesMarker1 = { "Abdelrahman Ahmed", "Abdulrahman Atif", "Seif Eldein", "Elwa Elewla" };
+		string[] patientNamesMarker2 = { "Abouelwafa Mohamed", "Ali Mustafa", "Karim Akmal", "Tamer Hosny" };
 		string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
 
 		if (objectList.Count > 0)
@@ -351,7 +347,7 @@ public class TuioDemo : Form, TuioListener
 
 								prevP = selectedPatient;
 								flag = 1;
-								SendMarkerData(tobj);
+								sendSocket(tobj);
 
 							}
 
@@ -438,7 +434,7 @@ public class TuioDemo : Form, TuioListener
 		Application.Run(app);
 	}
 
-	public void SendMarkerData(TuioObject markerData)
+	public void sendSocket(TuioObject markerData)
 	{
 		try
 		{
