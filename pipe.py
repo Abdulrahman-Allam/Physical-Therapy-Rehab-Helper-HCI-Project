@@ -1,5 +1,5 @@
-!pip install dollarpy
-!pip install mediapipe
+#!pip install dollarpy
+#!pip install mediapipe
 
 import mediapipe as mp # Import mediapipe
 import cv2 # Import opencv
@@ -92,3 +92,49 @@ def getPoints(videoURL,label):
     points = left_shoulder+right_shoulder+left_elbos+right_elbos+left_wirst+right_wrist+left_hip+right_hip+nose
     print(label)
     return points
+
+#vid = "../dataset/CatCow-Wrong-1.mp4"
+#points = getPoints(vid,"Wrong CatCow Movement") 
+#print(points)
+
+templates=[] #list of templates for training
+
+#Correct CatCow
+vid = "../dataset/CatCow-Correct-1.mp4"
+points = getPoints(vid,"CatCow Correct") 
+tmpl = Template('CatCow Correct', points)
+templates.append(tmpl)
+
+#Wrong CatCow
+vid = "../dataset/CatCow-Wrong-1.mp4"
+points = getPoints(vid,"CatCow Wrong") 
+tmpl = Template('CatCow Wrong', points)
+templates.append(tmpl)
+
+#Correct FlagPole
+vid = "../dataset/Dataset-Kyphosis- All Seated/Kyphosis-All Seated ex1-v1.mp4"
+points = getPoints(vid,"FlagPole Correct") 
+tmpl = Template('FlagPole Correct', points)
+templates.append(tmpl)
+
+#Correct CrissCross
+vid = "../dataset/Dataset-Kyphosis- All Seated/Kyphosis-All Seated ex2-v1.mp4"
+points = getPoints(vid,"CrissCross Correct") 
+tmpl = Template('CrissCross Correct', points)
+templates.append(tmpl)
+
+#TEST
+vid = "../dataset/CatCow-Correct-4.mp4"
+points = getPoints(vid,"CatCow Correct") 
+
+
+
+import time 
+start = time.time()
+recognizer = Recognizer(templates)
+result = recognizer.recognize(points)
+end = time.time()
+print(result[0])
+print("time taken to classify:"+ str(end-start))
+
+print(result)
