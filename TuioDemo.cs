@@ -21,8 +21,10 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Windows.Forms;
 using TUIO;
 
@@ -30,432 +32,498 @@ using TUIO;
 
 public class TuioDemo : Form, TuioListener
 {
-	private TuioClient client;
-	private Dictionary<long, TuioObject> objectList;
-	private Dictionary<long, TuioCursor> cursorList;
-	private Dictionary<long, TuioBlob> blobList;
-
-	public static int width, height;
-	private int screen_width = Screen.PrimaryScreen.Bounds.Width;
-	private int screen_height = Screen.PrimaryScreen.Bounds.Height;
-	private int w_top = 0;
-	private int w_width = 640;
-	private int w_height = 480;
-	private int w_left = 0;
-	public int prev_id = -1;
-	private bool fullscreen;
-	private bool verbose;
-
-	public string serverIP = "localhost"; // IP address of the Python server
-	public int port = 8000;               // Port number matching the Python server
-	int flag = 0;
-	Font font = new Font("Arial", 15.0f);
-	SolidBrush fntBrush = new SolidBrush(Color.White);
-	SolidBrush bgrBrush = new SolidBrush(Color.Black);
-	SolidBrush curBrush = new SolidBrush(Color.Yellow);
-	SolidBrush objBrush = new SolidBrush(Color.Purple);
-	SolidBrush blbBrush = new SolidBrush(Color.Red);
-	Pen curPen = new Pen(new SolidBrush(Color.Blue), 1);
-	private string objectImagePath;
-	private string backgroundImagePath;
-	TcpClient client1;
-	NetworkStream stream;
-	string title = "PTRH-HCI";
-	string prevP = "";
-
-	private string selectedPatient;
-
-	public TuioDemo(int port)
-	{
-
-		verbose = false;
-		fullscreen = false;
-		width = w_width;
-		height = w_height;
-
-		this.ClientSize = new System.Drawing.Size(width, height);
-		this.Name = "TuioDemo";
-		this.Text = title;
-
-		this.Closing += new CancelEventHandler(Form_Closing);
-		this.KeyDown += new KeyEventHandler(Form_KeyDown);
-
-		this.SetStyle(ControlStyles.AllPaintingInWmPaint |
-						ControlStyles.UserPaint |
-						ControlStyles.DoubleBuffer, true);
-
-		objectList = new Dictionary<long, TuioObject>(128);
-		cursorList = new Dictionary<long, TuioCursor>(128);
-		blobList = new Dictionary<long, TuioBlob>(128);
-
-		client = new TuioClient(port);
-		client.addTuioListener(this);
-
-		client.connect();
-
-		// Create a TCP/IP socket
-		client1 = new TcpClient(serverIP, 8000);
-		// Get the stream to send data
-		stream = client1.GetStream();
-
-	}
-
-	private void Form_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-	{
-
-		if (e.KeyData == Keys.F1)
-		{
-			if (fullscreen == false)
-			{
-
-				width = screen_width;
-				height = screen_height;
-
-				w_left = this.Left;
-				w_top = this.Top;
-
-				this.FormBorderStyle = FormBorderStyle.None;
-				this.Left = 0;
-				this.Top = 0;
-				this.Width = screen_width;
-				this.Height = screen_height;
-
-				fullscreen = true;
-			}
-			else
-			{
-
-				width = w_width;
-				height = w_height;
-
-				this.FormBorderStyle = FormBorderStyle.Sizable;
-				this.Left = w_left;
-				this.Top = w_top;
-				this.Width = w_width;
-				this.Height = w_height;
-
-				fullscreen = false;
-			}
-		}
-		else if (e.KeyData == Keys.Escape)
-		{
-			// Close everything
-			stream.Close();
-			client1.Close();
-			this.Close();
-
-		}
-		else if (e.KeyData == Keys.V)
-		{
-			verbose = !verbose;
-		}
-
-	}
-
-	private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-	{
-		client.removeTuioListener(this);
-
-		client.disconnect();
-		System.Environment.Exit(0);
-	}
-
-	public void addTuioObject(TuioObject o)
-	{
-		lock (objectList)
-		{
-			objectList.Add(o.SessionID, o);
-		}
-		if (verbose) Console.WriteLine("add obj " + o.SymbolID + " (" + o.SessionID + ") " + o.X + " " + o.Y + " " + o.Angle);
-	}
-
-	public void updateTuioObject(TuioObject o)
-	{
-
-		if (verbose) Console.WriteLine("set obj " + o.SymbolID + " " + o.SessionID + " " + o.X + " " + o.Y + " " + o.Angle + " " + o.MotionSpeed + " " + o.RotationSpeed + " " + o.MotionAccel + " " + o.RotationAccel);
-	}
-
-	public void removeTuioObject(TuioObject o)
-	{
-		lock (objectList)
-		{
-			objectList.Remove(o.SessionID);
-		}
-		if (verbose) Console.WriteLine("del obj " + o.SymbolID + " (" + o.SessionID + ")");
-	}
-
-	public void addTuioCursor(TuioCursor c)
-	{
-		lock (cursorList)
-		{
-			cursorList.Add(c.SessionID, c);
-		}
-		if (verbose) Console.WriteLine("add cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y);
-	}
-
-	public void updateTuioCursor(TuioCursor c)
-	{
-		if (verbose) Console.WriteLine("set cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y + " " + c.MotionSpeed + " " + c.MotionAccel);
-	}
-
-	public void removeTuioCursor(TuioCursor c)
-	{
-		lock (cursorList)
-		{
-			cursorList.Remove(c.SessionID);
-		}
-		if (verbose) Console.WriteLine("del cur " + c.CursorID + " (" + c.SessionID + ")");
-	}
-
-	public void addTuioBlob(TuioBlob b)
-	{
-		lock (blobList)
-		{
-			blobList.Add(b.SessionID, b);
-		}
-		if (verbose) Console.WriteLine("add blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area);
-	}
-
-	public void updateTuioBlob(TuioBlob b)
-	{
-
-		if (verbose) Console.WriteLine("set blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area + " " + b.MotionSpeed + " " + b.RotationSpeed + " " + b.MotionAccel + " " + b.RotationAccel);
-	}
-
-	public void removeTuioBlob(TuioBlob b)
-	{
-		lock (blobList)
-		{
-			blobList.Remove(b.SessionID);
-		}
-		if (verbose) Console.WriteLine("del blb " + b.BlobID + " (" + b.SessionID + ")");
-	}
-
-	public void refresh(TuioTime frameTime)
-	{
-		Invalidate();
-	}
-
-	protected override void OnPaintBackground(PaintEventArgs pevent)
-	{
-		// Getting the graphics object
-		Graphics g = pevent.Graphics;
-
-
-		// Draw the background
-		g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
-
-		// Draw the cursor path
-		if (cursorList.Count > 0)
-		{
-			lock (cursorList)
-			{
-				foreach (TuioCursor tcur in cursorList.Values)
-				{
-					List<TuioPoint> path = tcur.Path;
-					TuioPoint current_point = path[0];
-
-					for (int i = 0; i < path.Count; i++)
-					{
-						TuioPoint next_point = path[i];
-						g.DrawLine(curPen, current_point.getScreenX(width), current_point.getScreenY(height), next_point.getScreenX(width), next_point.getScreenY(height));
-						current_point = next_point;
-					}
-
-					g.FillEllipse(curBrush, current_point.getScreenX(width) - height / 100, current_point.getScreenY(height) - height / 100, height / 50, height / 50);
-					g.DrawString(tcur.CursorID + "", font, fntBrush, new PointF(tcur.getScreenX(width) - 10, tcur.getScreenY(height) - 10));
-				}
-			}
-		}
-
-		// Draw the circular menu
-		int menuRadius = height / 4;  // Adjust size based on your design
-		Point center = new Point(width / 2, height / 2);
-		g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
-
-		// Draw arcs
-		for (int i = 0; i < 4; i++)
-		{
-			double angleStart = i * 90;
-			g.FillPie(Brushes.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
-		}
-
-		// Define patient names based on marker ID
-		string[] patientNamesMarker1 = { "Abdelrahman Ahmed", "Abdulrahman Atif", "Seif Eldein", "Elwa Elewla" };
-		string[] patientNamesMarker2 = { "Abouelwafa Mohamed", "Ali Mustafa", "Karim Akmal", "Tamer Hosny" };
-		string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
-
-		if (objectList.Count > 0)
-		{
-			lock (objectList)
-			{
-				foreach (TuioObject tobj in objectList.Values)
-				{
-					// Get the marker position
-					int markerX = tobj.getScreenX(width);
-					int markerY = tobj.getScreenY(height);
-
-					// Calculate the distance from the center of the circle to the marker
-					double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
-
-
-
-					// Calculate the angle of the marker
-					double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
-					if (angle < 0) angle += 360; // Convert angle to 0-360 range
-
-					// Determine which arc the marker is in
-					int selectedQuadrant = (int)(angle / 90) % 4;
-
-					// Highlight the selected quadrant
-					g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
-
-					// Display patient names based on the marker ID
-					string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
-													tobj.SymbolID == 2 ? patientNamesMarker2 :
-													tobj.SymbolID == 3 ? patientNamesMarker3 : null;
-
-
-
-
-					if (currentPatientNames != null)
-					{
-						selectedPatient = currentPatientNames[selectedQuadrant];
-
-						g.FillRectangle(new SolidBrush(Color.DeepSkyBlue), new Rectangle(0, 5, selectedPatient.Length * 11, 30));
-						g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
-									 new Point(0, 8));
-
-						if (flag > 0)
-						{
-							g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, selectedPatient.Length * 18, 30));
-							g.DrawString(prevP + " selected", font, Brushes.White,
-										 new Point(230, 70));
-							flag++;
-							if (flag > 100)
-							{
-								flag = 0;
-							}
-
-						}
-
-
-						if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
-						{
-							if (prevP != selectedPatient)
-							{
-
-								prevP = selectedPatient;
-								flag = 1;
-								sendSocket(tobj);
-
-							}
-
-						}
-
-					}
-
-
-
-
-					// Existing object rendering logic
-					int ox = tobj.getScreenX(width);
-					int oy = tobj.getScreenY(height);
-					int size = height / 10;
-
-					g.TranslateTransform(ox, oy);
-					g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
-					g.TranslateTransform(-ox, -oy);
-
-					g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
-
-					g.TranslateTransform(ox, oy);
-					g.RotateTransform(-1 * (float)(tobj.Angle / Math.PI * 180.0f));
-					g.TranslateTransform(-ox, -oy);
-
-					g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
-
-					// Existing object image drawing logic...
-				}
-			}
-		}
-
-		// Draw the blobs
-		if (blobList.Count > 0)
-		{
-			lock (blobList)
-			{
-				foreach (TuioBlob tblb in blobList.Values)
-				{
-					int bx = tblb.getScreenX(width);
-					int by = tblb.getScreenY(height);
-					float bw = tblb.Width * width;
-					float bh = tblb.Height * height;
-
-					g.TranslateTransform(bx, by);
-					g.RotateTransform((float)(tblb.Angle / Math.PI * 180.0f));
-					g.TranslateTransform(-bx, -by);
-
-					g.FillEllipse(blbBrush, bx - bw / 2, by - bh / 2, bw, bh);
-
-					g.TranslateTransform(bx, by);
-					g.RotateTransform(-1 * (float)(tblb.Angle / Math.PI * 180.0f));
-					g.TranslateTransform(-bx, -by);
-
-					g.DrawString(tblb.BlobID + "", font, fntBrush, new PointF(bx, by));
-				}
-			}
-		}
-	}
-
-
-
-
-
-	public static void Main(String[] argv)
-	{
-		int port = 0;
-		switch (argv.Length)
-		{
-			case 1:
-				port = int.Parse(argv[0], null);
-				if (port == 0) goto default;
-				break;
-			case 0:
-				port = 3333;
-				break;
-			default:
-				Console.WriteLine("usage: mono TuioDemo [port]");
-				System.Environment.Exit(0);
-				break;
-		}
-
-		TuioDemo app = new TuioDemo(port);
-		Application.Run(app);
-	}
-
-	public void sendSocket(TuioObject markerData)
-	{
-		try
-		{
-			// Use selectedPatient variable directly
-			if (!string.IsNullOrEmpty(selectedPatient))
-			{
-				// Prepare the message to send
-				string messageToSend = $"Selected Patient: {selectedPatient}";
-
-				// Convert the message to a byte array
-				byte[] data = Encoding.UTF8.GetBytes(messageToSend);
-
-				// Send the message to the server
-				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", messageToSend);
-			}
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Exception: {0}", e);
-		}
-	}
+
+    private TuioClient client;
+    private TcpClient clientSocket;
+    private NetworkStream stream;
+    private Thread receiveThread;
+    private TcpListener serverSocket;
+
+
+
+
+    private Dictionary<long, TuioObject> objectList;
+    private Dictionary<long, TuioCursor> cursorList;
+    private Dictionary<long, TuioBlob> blobList;
+
+    public static int width, height;
+    private int screen_width = Screen.PrimaryScreen.Bounds.Width;
+    private int screen_height = Screen.PrimaryScreen.Bounds.Height;
+    private int w_top = 0;
+    private int w_width = 640;
+    private int w_height = 480;
+    private int w_left = 0;
+    public int prev_id = -1;
+    private bool fullscreen;
+    private bool verbose;
+
+    int flag = 0;
+    Font font = new Font("Arial", 15.0f);
+    SolidBrush fntBrush = new SolidBrush(Color.White);
+    SolidBrush bgrBrush = new SolidBrush(Color.Black);
+    SolidBrush curBrush = new SolidBrush(Color.Yellow);
+    SolidBrush objBrush = new SolidBrush(Color.Purple);
+    SolidBrush blbBrush = new SolidBrush(Color.Red);
+    Pen curPen = new Pen(new SolidBrush(Color.Blue), 1);
+    private string objectImagePath;
+    private string backgroundImagePath;
+    TcpClient client1;
+    string title = "PTRH-HCI";
+    string prevP = "";
+
+    private string selectedPatient;
+
+    public TuioDemo(int port)
+    {
+
+
+
+        verbose = false;
+        fullscreen = false;
+        width = w_width;
+        height = w_height;
+
+        this.ClientSize = new System.Drawing.Size(width, height);
+        this.Name = "TuioDemo";
+        this.Text = title;
+
+        this.Closing += new CancelEventHandler(Form_Closing);
+        this.KeyDown += new KeyEventHandler(Form_KeyDown);
+
+        this.SetStyle(ControlStyles.AllPaintingInWmPaint |
+                        ControlStyles.UserPaint |
+                        ControlStyles.DoubleBuffer, true);
+
+        objectList = new Dictionary<long, TuioObject>(128);
+        cursorList = new Dictionary<long, TuioCursor>(128);
+        blobList = new Dictionary<long, TuioBlob>(128);
+
+        //client = new TuioClient(port);
+        //client.addTuioListener(this);
+
+        //client.connect();
+
+        // Initialize Tuio client
+        //client = new TuioClient(port);
+        //client.addTuioListener(this);
+        //client.connect();
+
+
+
+        // Initialize TCP server
+        serverSocket = new TcpListener(IPAddress.Any, port);
+        serverSocket.Start();
+        MessageBox.Show("Server started and listening on port " + port);
+
+        // Start a thread to listen for incoming client connections
+        receiveThread = new Thread(new ThreadStart(WaitForClient));
+        receiveThread.IsBackground = true;
+        receiveThread.Start();
+
+
+
+    }
+
+    private void Form_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+    {
+
+        if (e.KeyData == Keys.F1)
+        {
+            if (fullscreen == false)
+            {
+
+                width = screen_width;
+                height = screen_height;
+
+                w_left = this.Left;
+                w_top = this.Top;
+
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.Left = 0;
+                this.Top = 0;
+                this.Width = screen_width;
+                this.Height = screen_height;
+
+                fullscreen = true;
+            }
+            else
+            {
+
+                width = w_width;
+                height = w_height;
+
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.Left = w_left;
+                this.Top = w_top;
+                this.Width = w_width;
+                this.Height = w_height;
+
+                fullscreen = false;
+            }
+        }
+        else if (e.KeyData == Keys.Escape)
+        {
+            // Close everything
+            //stream.Close();
+            //client1.Close();
+            //this.Close();
+
+        }
+        else if (e.KeyData == Keys.V)
+        {
+            verbose = !verbose;
+        }
+
+    }
+
+    private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        //client.removeTuioListener(this);
+
+        //client.disconnect();
+        //System.Environment.Exit(0);
+    }
+
+    public void addTuioObject(TuioObject o)
+    {
+        lock (objectList)
+        {
+            objectList.Add(o.SessionID, o);
+        }
+        if (verbose) Console.WriteLine("add obj " + o.SymbolID + " (" + o.SessionID + ") " + o.X + " " + o.Y + " " + o.Angle);
+    }
+
+    public void updateTuioObject(TuioObject o)
+    {
+
+        if (verbose) Console.WriteLine("set obj " + o.SymbolID + " " + o.SessionID + " " + o.X + " " + o.Y + " " + o.Angle + " " + o.MotionSpeed + " " + o.RotationSpeed + " " + o.MotionAccel + " " + o.RotationAccel);
+    }
+
+    public void removeTuioObject(TuioObject o)
+    {
+        lock (objectList)
+        {
+            objectList.Remove(o.SessionID);
+        }
+        if (verbose) Console.WriteLine("del obj " + o.SymbolID + " (" + o.SessionID + ")");
+    }
+
+    public void addTuioCursor(TuioCursor c)
+    {
+        lock (cursorList)
+        {
+            cursorList.Add(c.SessionID, c);
+        }
+        if (verbose) Console.WriteLine("add cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y);
+    }
+
+    public void updateTuioCursor(TuioCursor c)
+    {
+        if (verbose) Console.WriteLine("set cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y + " " + c.MotionSpeed + " " + c.MotionAccel);
+    }
+
+    public void removeTuioCursor(TuioCursor c)
+    {
+        lock (cursorList)
+        {
+            cursorList.Remove(c.SessionID);
+        }
+        if (verbose) Console.WriteLine("del cur " + c.CursorID + " (" + c.SessionID + ")");
+    }
+
+    public void addTuioBlob(TuioBlob b)
+    {
+        lock (blobList)
+        {
+            blobList.Add(b.SessionID, b);
+        }
+        if (verbose) Console.WriteLine("add blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area);
+    }
+
+    public void updateTuioBlob(TuioBlob b)
+    {
+
+        if (verbose) Console.WriteLine("set blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area + " " + b.MotionSpeed + " " + b.RotationSpeed + " " + b.MotionAccel + " " + b.RotationAccel);
+    }
+
+    public void removeTuioBlob(TuioBlob b)
+    {
+        lock (blobList)
+        {
+            blobList.Remove(b.SessionID);
+        }
+        if (verbose) Console.WriteLine("del blb " + b.BlobID + " (" + b.SessionID + ")");
+    }
+
+    public void refresh(TuioTime frameTime)
+    {
+        Invalidate();
+    }
+
+    protected override void OnPaintBackground(PaintEventArgs pevent)
+    {
+        // Getting the graphics object
+        Graphics g = pevent.Graphics;
+
+
+        // Draw the background
+        g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
+
+        // Draw the cursor path
+        if (cursorList.Count > 0)
+        {
+            lock (cursorList)
+            {
+                foreach (TuioCursor tcur in cursorList.Values)
+                {
+                    List<TuioPoint> path = tcur.Path;
+                    TuioPoint current_point = path[0];
+
+                    for (int i = 0; i < path.Count; i++)
+                    {
+                        TuioPoint next_point = path[i];
+                        g.DrawLine(curPen, current_point.getScreenX(width), current_point.getScreenY(height), next_point.getScreenX(width), next_point.getScreenY(height));
+                        current_point = next_point;
+                    }
+
+                    g.FillEllipse(curBrush, current_point.getScreenX(width) - height / 100, current_point.getScreenY(height) - height / 100, height / 50, height / 50);
+                    g.DrawString(tcur.CursorID + "", font, fntBrush, new PointF(tcur.getScreenX(width) - 10, tcur.getScreenY(height) - 10));
+                }
+            }
+        }
+
+        // Draw the circular menu
+        int menuRadius = height / 4;  // Adjust size based on your design
+        Point center = new Point(width / 2, height / 2);
+        g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
+
+        // Draw arcs
+        for (int i = 0; i < 4; i++)
+        {
+            double angleStart = i * 90;
+            g.FillPie(Brushes.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
+        }
+
+        // Define patient names based on marker ID
+        string[] patientNamesMarker1 = { "Abdelrahman Ahmed", "Abdulrahman Atif", "Seif Eldein", "Elwa Elewla" };
+        string[] patientNamesMarker2 = { "Abouelwafa Mohamed", "Ali Mustafa", "Karim Akmal", "Tamer Hosny" };
+        string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
+
+        if (objectList.Count > 0)
+        {
+            lock (objectList)
+            {
+                foreach (TuioObject tobj in objectList.Values)
+                {
+                    // Get the marker position
+                    int markerX = tobj.getScreenX(width);
+                    int markerY = tobj.getScreenY(height);
+
+                    // Calculate the distance from the center of the circle to the marker
+                    double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
+
+
+
+                    // Calculate the angle of the marker
+                    double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
+                    if (angle < 0) angle += 360; // Convert angle to 0-360 range
+
+                    // Determine which arc the marker is in
+                    int selectedQuadrant = (int)(angle / 90) % 4;
+
+                    // Highlight the selected quadrant
+                    g.FillPie(Brushes.Yellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
+
+                    // Display patient names based on the marker ID
+                    string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
+                                                    tobj.SymbolID == 2 ? patientNamesMarker2 :
+                                                    tobj.SymbolID == 3 ? patientNamesMarker3 : null;
+
+
+
+
+                    if (currentPatientNames != null)
+                    {
+                        selectedPatient = currentPatientNames[selectedQuadrant];
+
+                        g.FillRectangle(new SolidBrush(Color.DeepSkyBlue), new Rectangle(0, 5, selectedPatient.Length * 11, 30));
+                        g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
+                                     new Point(0, 8));
+
+                        if (flag > 0)
+                        {
+                            g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, selectedPatient.Length * 18, 30));
+                            g.DrawString(prevP + " selected", font, Brushes.White,
+                                         new Point(230, 70));
+                            flag++;
+                            if (flag > 100)
+                            {
+                                flag = 0;
+                            }
+
+                        }
+
+
+                        if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
+                        {
+                            if (prevP != selectedPatient)
+                            {
+
+                                prevP = selectedPatient;
+                                flag = 1;
+
+                            }
+
+                        }
+
+                    }
+
+
+
+
+                    // Existing object rendering logic
+                    int ox = tobj.getScreenX(width);
+                    int oy = tobj.getScreenY(height);
+                    int size = height / 10;
+
+                    g.TranslateTransform(ox, oy);
+                    g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
+                    g.TranslateTransform(-ox, -oy);
+
+                    g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
+
+                    g.TranslateTransform(ox, oy);
+                    g.RotateTransform(-1 * (float)(tobj.Angle / Math.PI * 180.0f));
+                    g.TranslateTransform(-ox, -oy);
+
+                    g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
+
+                    // Existing object image drawing logic...
+                }
+            }
+        }
+
+        // Draw the blobs
+        if (blobList.Count > 0)
+        {
+            lock (blobList)
+            {
+                foreach (TuioBlob tblb in blobList.Values)
+                {
+                    int bx = tblb.getScreenX(width);
+                    int by = tblb.getScreenY(height);
+                    float bw = tblb.Width * width;
+                    float bh = tblb.Height * height;
+
+                    g.TranslateTransform(bx, by);
+                    g.RotateTransform((float)(tblb.Angle / Math.PI * 180.0f));
+                    g.TranslateTransform(-bx, -by);
+
+                    g.FillEllipse(blbBrush, bx - bw / 2, by - bh / 2, bw, bh);
+
+                    g.TranslateTransform(bx, by);
+                    g.RotateTransform(-1 * (float)(tblb.Angle / Math.PI * 180.0f));
+                    g.TranslateTransform(-bx, -by);
+
+                    g.DrawString(tblb.BlobID + "", font, fntBrush, new PointF(bx, by));
+                }
+            }
+        }
+    }
+
+
+
+
+
+    public static void Main(String[] argv)
+    {
+        int port = 0;
+        switch (argv.Length)
+        {
+            case 1:
+                port = int.Parse(argv[0], null);
+                if (port == 0) goto default;
+                break;
+            case 0:
+                port = 8000;
+                break;
+            default:
+                Console.WriteLine("usage: mono TuioDemo [port]");
+                System.Environment.Exit(0);
+                break;
+        }
+
+        TuioDemo app = new TuioDemo(port);
+        Application.Run(app);
+    }
+
+
+    // Process the received message in Receive_socket
+    public void Receive_socket(string message)
+    {
+        // Here, you can update the UI or handle the message data as needed
+
+    }
+
+    private void WaitForClient()
+    {
+        try
+        {
+            while (true)
+            {
+                // Accept client connection
+                clientSocket = serverSocket.AcceptTcpClient();
+                stream = clientSocket.GetStream();
+                Console.WriteLine("Client connected.");
+
+                // Start receiving messages from the client
+                ReceiveMessages();
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Server error: {e.Message}");
+        }
+    }
+
+    private void ReceiveMessages()
+    {
+        try
+        {
+            while (true)
+            {
+                if (stream != null && stream.CanRead)
+                {
+                    // Buffer to store the incoming bytes
+                    byte[] buffer = new byte[1024];
+                    int bytesRead = stream.Read(buffer, 0, buffer.Length);
+
+                    if (bytesRead > 0)
+                    {
+                        // Convert the received bytes to a string
+                        string message = Encoding.UTF8.GetString(buffer, 0, bytesRead);
+                        Console.WriteLine("Received from Python client: " + message);
+
+                        // Process the received message in the Receive_socket method
+                        Receive_socket(message);
+                    }
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error receiving data: {e.Message}");
+        }
+    }
+
+    protected override void OnFormClosing(FormClosingEventArgs e)
+    {
+        // Stop listening and close sockets
+        serverSocket?.Stop();
+        receiveThread?.Abort();
+        stream?.Close();
+        clientSocket?.Close();
+        base.OnFormClosing(e);
+    }
 
 }
