@@ -50,6 +50,12 @@ public class Patient
     }
 }
 
+public class Patient
+{
+	public string name = "";
+	public string age = "";
+	public string score = "";
+	public string mac = "";
 
 
 public class TuioDemo : Form, TuioListener
@@ -113,6 +119,7 @@ public class TuioDemo : Form, TuioListener
         fullscreen = false;
         width = w_width;
         height = w_height;
+		height = w_height;
 
         this.ClientSize = new System.Drawing.Size(width, height);
         this.Name = "TuioDemo";
@@ -190,11 +197,11 @@ public class TuioDemo : Form, TuioListener
         {
             verbose = !verbose;
         }
-
         if (e.KeyData == Keys.P)
         {
             receiveSocket();
         }
+		}
 
     }
 
@@ -276,12 +283,12 @@ public class TuioDemo : Form, TuioListener
         }
         if (verbose) Console.WriteLine("del blb " + b.BlobID + " (" + b.SessionID + ")");
     }
-
     public void refresh(TuioTime frameTime)
     {
         receiveSocket();
         Invalidate();
     }
+	}
 
     protected override void OnPaintBackground(PaintEventArgs pevent)
     {
@@ -291,7 +298,6 @@ public class TuioDemo : Form, TuioListener
 
         // Draw the background
         g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
-
         if (patient)
         {
             g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, logPatient.name.Length * 40, 30));
@@ -324,31 +330,31 @@ public class TuioDemo : Form, TuioListener
                         {
                             List<TuioPoint> path = tcur.Path;
                             TuioPoint current_point = path[0];
-
+					TuioPoint current_point = path[0];
                             for (int i = 0; i < path.Count; i++)
                             {
                                 TuioPoint next_point = path[i];
                                 g.DrawLine(curPen, current_point.getScreenX(width), current_point.getScreenY(height), next_point.getScreenX(width), next_point.getScreenY(height));
                                 current_point = next_point;
                             }
-
+					}
                             g.FillEllipse(curBrush, current_point.getScreenX(width) - height / 100, current_point.getScreenY(height) - height / 100, height / 50, height / 50);
                             g.DrawString(tcur.CursorID + "", font, fntBrush, new PointF(tcur.getScreenX(width) - 10, tcur.getScreenY(height) - 10));
                         }
                     }
                 }
-
+		}
                 // Draw the circular menu
 
                 g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
-
+		g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
                 // Draw arcs
                 for (int i = 0; i < 4; i++)
                 {
                     double angleStart = i * 90;
                     g.FillPie(Brushes.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
                 }
-
+		}
                 if (objectList.Count > 0)
                 {
                     lock (objectList)
@@ -358,46 +364,46 @@ public class TuioDemo : Form, TuioListener
                             // Get the marker position
                             int markerX = tobj.getScreenX(width);
                             int markerY = tobj.getScreenY(height);
-
+					int markerY = tobj.getScreenY(height);
                             // Calculate the distance from the center of the circle to the marker
                             double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
-
+					double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
 
 
                             // Calculate the angle of the marker
                             double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
                             if (angle < 0) angle += 360; // Convert angle to 0-360 range
-
+					if (angle < 0) angle += 360; // Convert angle to 0-360 range
                             // Determine which arc the marker is in
                             int selectedQuadrant = (int)(angle / 90) % 4;
-
+					int selectedQuadrant = (int)(angle / 90) % 4;
                             // Highlight the selected quadrant
                             g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
-
+					g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
                             // Display patient names based on the marker ID
                             string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
                                                             tobj.SymbolID == 2 ? patientNamesMarker2 :
                                                             tobj.SymbolID == 3 ? patientNamesMarker3 : null;
-
+													tobj.SymbolID == 3 ? patientNamesMarker3 : null;
 
 
 
                             if (currentPatientNames != null)
                             {
                                 selectedPatient = currentPatientNames[selectedQuadrant];
-
+						selectedPatient = currentPatientNames[selectedQuadrant];
                                 g.FillRectangle(new SolidBrush(Color.DeepSkyBlue), new Rectangle(0, 5, selectedPatient.Length * 11, 30));
                                 g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
                                              new Point(0, 8));
-
-
-
+									 new Point(0, 8));
+							}
+						}
 
                                 if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
                                 {
                                     if (prevP != selectedPatient)
                                     {
-
+							{
                                         prevP = selectedPatient;
                                         for (int i = 0; i < patients.Count; i++)
                                         {
@@ -409,13 +415,13 @@ public class TuioDemo : Form, TuioListener
                                         }
                                         flag = 1;
                                         sendSocket(tobj);
-
+								sendSocket(tobj);
                                     }
-
+							}
                                 }
-
+						}
                             }
-
+					}
 
 
 
@@ -423,19 +429,19 @@ public class TuioDemo : Form, TuioListener
                             int ox = tobj.getScreenX(width);
                             int oy = tobj.getScreenY(height);
                             int size = height / 10;
-
+					int size = height / 10;
                             g.TranslateTransform(ox, oy);
                             g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
                             g.TranslateTransform(-ox, -oy);
-
+					g.TranslateTransform(-ox, -oy);
                             g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
-
+					g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
                             g.TranslateTransform(ox, oy);
                             g.RotateTransform(-1 * (float)(tobj.Angle / Math.PI * 180.0f));
                             g.TranslateTransform(-ox, -oy);
-
+					g.TranslateTransform(-ox, -oy);
                             g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
-
+					g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
                             // Existing object image drawing logic...
                         }
                     }
@@ -450,7 +456,7 @@ public class TuioDemo : Form, TuioListener
                 {
                     g.FillRectangle(backBoxBrush, backBoxRect);
                 }
-
+		}
                 // Draw the back label inside the back box
                 using (Font backFont = new Font("Arial", 24, FontStyle.Bold))
                 using (Brush backTextBrush = new SolidBrush(Color.White))
@@ -553,17 +559,17 @@ public class TuioDemo : Form, TuioListener
                         int by = tblb.getScreenY(height);
                         float bw = tblb.Width * width;
                         float bh = tblb.Height * height;
-
+					float bh = tblb.Height * height;
                         g.TranslateTransform(bx, by);
                         g.RotateTransform((float)(tblb.Angle / Math.PI * 180.0f));
                         g.TranslateTransform(-bx, -by);
-
+					g.TranslateTransform(-bx, -by);
                         g.FillEllipse(blbBrush, bx - bw / 2, by - bh / 2, bw, bh);
-
+					g.FillEllipse(blbBrush, bx - bw / 2, by - bh / 2, bw, bh);
                         g.TranslateTransform(bx, by);
                         g.RotateTransform(-1 * (float)(tblb.Angle / Math.PI * 180.0f));
                         g.TranslateTransform(-bx, -by);
-
+					g.TranslateTransform(-bx, -by);
                         g.DrawString(tblb.BlobID + "", font, fntBrush, new PointF(bx, by));
                     }
                 }
@@ -572,6 +578,7 @@ public class TuioDemo : Form, TuioListener
 
 
     }
+	}
 
 
 
@@ -623,7 +630,6 @@ public class TuioDemo : Form, TuioListener
         }
     }
 
-
     public void receiveSocket()
     {
         try
@@ -635,11 +641,11 @@ public class TuioDemo : Form, TuioListener
                 byte[] data = new byte[256];
                 StringBuilder responseData = new StringBuilder();
                 int bytes = stream.Read(data, 0, data.Length);
+				int bytes = stream.Read(data, 0, data.Length);
 
                 // Decode the data into a string
                 responseData.Append(Encoding.UTF8.GetString(data, 0, bytes));
                 Console.WriteLine("Received: {0}", responseData.ToString());
-
                 // Process the received message
                 string res = responseData.ToString();
 
@@ -677,5 +683,6 @@ public class TuioDemo : Form, TuioListener
             Console.WriteLine("Exception: {0}", e);
         }
     }
+	}
 
 }

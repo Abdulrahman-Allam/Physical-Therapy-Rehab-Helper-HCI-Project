@@ -1,6 +1,9 @@
 {
   "ExpandedNodes": [
-    ""
+    "",
+    "\\doc",
+    "\\OSC.NET",
+    "\\TUIO"
   ],
   "SelectedNode": "\\TUIO_CSHARP.sln",
   "PreviewInSolutionExplorer": false

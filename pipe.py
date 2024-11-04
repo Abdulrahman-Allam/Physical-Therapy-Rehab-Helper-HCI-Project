@@ -1,6 +1,5 @@
-!pip install dollarpy
-!pip install mediapipe
-
+import pickle
+import math
 import mediapipe as mp # Import mediapipe
 import cv2 # Import opencv
 from dollarpy import Recognizer, Template, Point
@@ -9,10 +8,6 @@ mp_drawing = mp.solutions.drawing_utils # Drawing helpers
 mp_drawing_styles = mp.solutions.drawing_styles
 
 mp_holistic = mp.solutions.holistic # Mediapipe Solutions
-
-templates=[] #list of templates for $1 training
-
-
 
 
 def getPoints(videoURL,label):
@@ -92,3 +87,22 @@ def getPoints(videoURL,label):
     points = left_shoulder+right_shoulder+left_elbos+right_elbos+left_wirst+right_wrist+left_hip+right_hip+nose
     print(label)
     return points
+
+# Load the recognizer model from the file
+with open('recognizer_model.pkl', 'rb') as file:
+    recognizer = pickle.load(file)
+
+#TEST
+vid = "../dataset/CatCow-Wrong-4.mp4" # use "/videos/"" + username
+points = getPoints(vid,"Unknown") # keep as unknown
+
+import time
+start = time.time()
+result = recognizer.recognize(points)
+end = time.time()
+print(result[0])
+print("time taken to classify:"+ str(end-start))
+
+score = math.floor(result[1] * 1000)
+
+print(score)
