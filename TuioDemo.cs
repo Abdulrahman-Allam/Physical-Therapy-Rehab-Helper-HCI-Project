@@ -17,8 +17,6 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
-//mine
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -45,9 +43,9 @@ public class Patient
 	}
 
 	public Patient()
-    {
+	{
 
-    }
+	}
 }
 
 
@@ -69,7 +67,6 @@ public class TuioDemo : Form, TuioListener
 	public int prev_id = -1;
 	private bool fullscreen;
 	private bool verbose;
-
 	public string serverIP = "localhost"; // IP address of the Python server
 	public int port = 8000;               // Port number matching the Python server
 	int flag = 0;
@@ -98,12 +95,14 @@ public class TuioDemo : Form, TuioListener
 		new Patient("Abdo", "21", "400", "A0:D0:5B:27:31:14"),
 		new Patient("Assem", "24", "300", "A0:D0:5B:27:31:15"),
 		new Patient("Seif", "21", "200", "A0:D0:5B:27:31:16"),
+		new Patient("Kenakai", "21", "200", "B0:E4:5C:37:97:1F"),
+		new Patient("Abuelwafa", "21", "200", "6F:F2:1E:3F:B2:BB"),
 	};
 	Patient logPatient = new Patient();
 
 
 
-	
+
 
 	private string selectedPatient;
 
@@ -292,16 +291,16 @@ public class TuioDemo : Form, TuioListener
 		// Draw the background
 		g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
 
-		if(patient)
-        {
+		if (patient)
+		{
 			g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, logPatient.name.Length * 40, 30));
 			g.DrawString("welcome " + logPatient.name, font, Brushes.White,
 						 new Point(230, 70));
 			g.DrawString("your score: " + logPatient.score, font, Brushes.White,
 						 new Point(230, 100));
 		}
-        else if(doctor)
-        {
+		else if (doctor)
+		{
 			int menuRadius = height / 4;  // Adjust size based on your design
 			Point center = new Point(width / 2, height / 2);
 
@@ -570,7 +569,7 @@ public class TuioDemo : Form, TuioListener
 			}
 		}
 
-		
+
 	}
 
 
@@ -645,12 +644,12 @@ public class TuioDemo : Form, TuioListener
 
 				string[] parts = res.Split(',');
 
-				if(parts.Length == 1)
-                {
+				if (parts[0] == "A0:D0:5B:27:31:17")
+				{
 					doctor = true;
-                }
-                else
-                {
+				}
+				else
+				{
 					for (int i = 0; i < patients.Count; i++)
 					{
 						if (patients[i].mac == parts[0])
@@ -663,7 +662,7 @@ public class TuioDemo : Form, TuioListener
 					}
 				}
 
-				
+
 
 
 
