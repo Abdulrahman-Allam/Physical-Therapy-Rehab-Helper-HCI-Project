@@ -1,4 +1,5 @@
 import pickle
+import math
 import mediapipe as mp # Import mediapipe
 import cv2 # Import opencv
 from dollarpy import Recognizer, Template, Point
@@ -95,11 +96,13 @@ with open('recognizer_model.pkl', 'rb') as file:
 vid = "../dataset/CatCow-Wrong-4.mp4" # use "/videos/"" + username
 points = getPoints(vid,"Unknown") # keep as unknown
 
-import time 
+import time
 start = time.time()
 result = recognizer.recognize(points)
 end = time.time()
 print(result[0])
 print("time taken to classify:"+ str(end-start))
 
-print(result)
+score = math.floor(result[1] * 1000)
+
+print(score)
