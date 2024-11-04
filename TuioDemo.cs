@@ -50,14 +50,6 @@ public class Patient
     }
 }
 
-public class Patient
-{
-	public string name = "";
-	public string age = "";
-	public string score = "";
-	public string mac = "";
-
-
 public class TuioDemo : Form, TuioListener
 {
     private TuioClient client;
@@ -201,7 +193,6 @@ public class TuioDemo : Form, TuioListener
         {
             receiveSocket();
         }
-		}
 
     }
 
@@ -288,7 +279,7 @@ public class TuioDemo : Form, TuioListener
         receiveSocket();
         Invalidate();
     }
-	}
+	
 
     protected override void OnPaintBackground(PaintEventArgs pevent)
     {
@@ -422,23 +413,6 @@ public class TuioDemo : Form, TuioListener
 
 							}
 
-
-                // Draw TUIO Marker cursors last to bring them "above" other controls
-                if (objectList.Count > 0)
-                {
-                    lock (objectList)
-                    {
-                        foreach (TuioObject tobj in objectList.Values)
-                        {
-                            // Get marker position and draw markers
-                            int markerX = tobj.getScreenX(width);
-                            int markerY = tobj.getScreenY(height);
-
-                            // Calculate angle and position
-                            double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
-                            double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
-                            if (angle < 0) angle += 360;
-
 							// Existing object rendering logic
 							int ox = tobj.getScreenX(width);
 							int oy = tobj.getScreenY(height);
@@ -522,9 +496,6 @@ public class TuioDemo : Form, TuioListener
 							int oy = tobj.getScreenY(height);
 							int size = height / 10;
 
-
-
-
 							if (backBoxRect.Contains(markerX, markerY))
 							{
 								// Check if the rotation angle is close to 90 degrees
@@ -533,11 +504,6 @@ public class TuioDemo : Form, TuioListener
 									flag = 0;
 								}
 							}
-
-
-
-
-
 
 							g.TranslateTransform(ox, oy);
 							g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
@@ -553,14 +519,7 @@ public class TuioDemo : Form, TuioListener
 						}
 					}
 				}
-
-
-
 			}
-
-
-
-
 
 			// Draw the blobs
 			if (blobList.Count > 0)
@@ -592,7 +551,7 @@ public class TuioDemo : Form, TuioListener
 
 
     }
-	}
+
 
 
 
@@ -655,7 +614,6 @@ public class TuioDemo : Form, TuioListener
                 byte[] data = new byte[256];
                 StringBuilder responseData = new StringBuilder();
                 int bytes = stream.Read(data, 0, data.Length);
-				int bytes = stream.Read(data, 0, data.Length);
 
                 // Decode the data into a string
                 responseData.Append(Encoding.UTF8.GetString(data, 0, bytes));
@@ -682,14 +640,6 @@ public class TuioDemo : Form, TuioListener
                         }
                     }
                 }
-
-
-
-
-
-
-
-
             }
         }
         catch (Exception e)
@@ -697,6 +647,4 @@ public class TuioDemo : Form, TuioListener
             Console.WriteLine("Exception: {0}", e);
         }
     }
-	}
-
 }
