@@ -17,6 +17,8 @@
 	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+//mine
+
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -87,9 +89,15 @@ public class TuioDemo : Form, TuioListener
 
 	bool patient = false;
 	bool doctor = false;
+	Patient currPatient;
 	List<Patient> patients = new List<Patient>
 	{
-		new Patient("hamza","18","70","A0:D0:5B:27:31:17")
+		new Patient("Hamza","19","600","A0:D0:5B:27:31:17"),
+		new Patient("DHOM", "21", "555", "A0:D0:5B:27:31:12"),
+		new Patient("Abood", "20", "500", "A0:D0:5B:27:31:13"),
+		new Patient("Abdo", "21", "400", "A0:D0:5B:27:31:14"),
+		new Patient("Assem", "24", "300", "A0:D0:5B:27:31:15"),
+		new Patient("Seif", "21", "200", "A0:D0:5B:27:31:16"),
 	};
 	Patient logPatient = new Patient();
 
@@ -294,140 +302,245 @@ public class TuioDemo : Form, TuioListener
 		}
         else if(doctor)
         {
-			// Draw the cursor path
-			if (cursorList.Count > 0)
+			int menuRadius = height / 4;  // Adjust size based on your design
+			Point center = new Point(width / 2, height / 2);
+
+			// Define patient names based on marker ID
+			string[] patientNamesMarker1 = { patients[0].name, patients[1].name, patients[2].name, patients[3].name };
+			string[] patientNamesMarker2 = { patients[4].name, patients[5].name, "Kareem Karam", "Tamer Hosny" };
+			string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
+
+			if (flag == 0)
 			{
-				lock (cursorList)
+				// Draw the background
+				g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
+
+				// Draw the cursor path
+				if (cursorList.Count > 0)
 				{
-					foreach (TuioCursor tcur in cursorList.Values)
+					lock (cursorList)
 					{
-						List<TuioPoint> path = tcur.Path;
-						TuioPoint current_point = path[0];
-
-						for (int i = 0; i < path.Count; i++)
+						foreach (TuioCursor tcur in cursorList.Values)
 						{
-							TuioPoint next_point = path[i];
-							g.DrawLine(curPen, current_point.getScreenX(width), current_point.getScreenY(height), next_point.getScreenX(width), next_point.getScreenY(height));
-							current_point = next_point;
-						}
+							List<TuioPoint> path = tcur.Path;
+							TuioPoint current_point = path[0];
 
-						g.FillEllipse(curBrush, current_point.getScreenX(width) - height / 100, current_point.getScreenY(height) - height / 100, height / 50, height / 50);
-						g.DrawString(tcur.CursorID + "", font, fntBrush, new PointF(tcur.getScreenX(width) - 10, tcur.getScreenY(height) - 10));
+							for (int i = 0; i < path.Count; i++)
+							{
+								TuioPoint next_point = path[i];
+								g.DrawLine(curPen, current_point.getScreenX(width), current_point.getScreenY(height), next_point.getScreenX(width), next_point.getScreenY(height));
+								current_point = next_point;
+							}
+
+							g.FillEllipse(curBrush, current_point.getScreenX(width) - height / 100, current_point.getScreenY(height) - height / 100, height / 50, height / 50);
+							g.DrawString(tcur.CursorID + "", font, fntBrush, new PointF(tcur.getScreenX(width) - 10, tcur.getScreenY(height) - 10));
+						}
+					}
+				}
+
+				// Draw the circular menu
+
+				g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
+
+				// Draw arcs
+				for (int i = 0; i < 4; i++)
+				{
+					double angleStart = i * 90;
+					g.FillPie(Brushes.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
+				}
+
+				if (objectList.Count > 0)
+				{
+					lock (objectList)
+					{
+						foreach (TuioObject tobj in objectList.Values)
+						{
+							// Get the marker position
+							int markerX = tobj.getScreenX(width);
+							int markerY = tobj.getScreenY(height);
+
+							// Calculate the distance from the center of the circle to the marker
+							double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
+
+
+
+							// Calculate the angle of the marker
+							double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
+							if (angle < 0) angle += 360; // Convert angle to 0-360 range
+
+							// Determine which arc the marker is in
+							int selectedQuadrant = (int)(angle / 90) % 4;
+
+							// Highlight the selected quadrant
+							g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
+
+							// Display patient names based on the marker ID
+							string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
+															tobj.SymbolID == 2 ? patientNamesMarker2 :
+															tobj.SymbolID == 3 ? patientNamesMarker3 : null;
+
+
+
+
+							if (currentPatientNames != null)
+							{
+								selectedPatient = currentPatientNames[selectedQuadrant];
+
+								g.FillRectangle(new SolidBrush(Color.DeepSkyBlue), new Rectangle(0, 5, selectedPatient.Length * 11, 30));
+								g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
+											 new Point(0, 8));
+
+
+
+
+								if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
+								{
+									if (prevP != selectedPatient)
+									{
+
+										prevP = selectedPatient;
+										for (int i = 0; i < patients.Count; i++)
+										{
+											if (patients[i].name == prevP)
+											{
+												currPatient = patients[i];
+												break;
+											}
+										}
+										flag = 1;
+										sendSocket(tobj);
+
+									}
+
+								}
+
+							}
+
+
+
+
+							// Existing object rendering logic
+							int ox = tobj.getScreenX(width);
+							int oy = tobj.getScreenY(height);
+							int size = height / 10;
+
+							g.TranslateTransform(ox, oy);
+							g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
+							g.TranslateTransform(-ox, -oy);
+
+							g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
+
+							g.TranslateTransform(ox, oy);
+							g.RotateTransform(-1 * (float)(tobj.Angle / Math.PI * 180.0f));
+							g.TranslateTransform(-ox, -oy);
+
+							g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
+
+							// Existing object image drawing logic...
+						}
 					}
 				}
 			}
-
-			// Draw the circular menu
-			int menuRadius = height / 4;  // Adjust size based on your design
-			Point center = new Point(width / 2, height / 2);
-			g.DrawEllipse(Pens.Red, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2);
-
-			// Draw arcs
-			for (int i = 0; i < 4; i++)
+			else if (flag == 1)
 			{
-				double angleStart = i * 90;
-				g.FillPie(Brushes.White, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, (float)angleStart, 90);
-			}
-
-			// Define patient names based on marker ID
-			string[] patientNamesMarker1 = { "Abdelrahman Ahmed", "Abdulrahman Atif", "Seif Eldein", "Elwa Elewla" };
-			string[] patientNamesMarker2 = { "Abouelwafa Mohamed", "Ali Mustafa", "Karim Akmal", "Tamer Hosny" };
-			string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
-
-			if (objectList.Count > 0)
-			{
-				lock (objectList)
+				this.StartPosition = FormStartPosition.CenterScreen;
+				this.BackColor = Color.Black;
+				Rectangle backBoxRect = new Rectangle(10, 10, 150, this.Height - 60);
+				using (Brush backBoxBrush = new SolidBrush(Color.Green))
 				{
-					foreach (TuioObject tobj in objectList.Values)
+					g.FillRectangle(backBoxBrush, backBoxRect);
+				}
+
+				// Draw the back label inside the back box
+				using (Font backFont = new Font("Arial", 24, FontStyle.Bold))
+				using (Brush backTextBrush = new SolidBrush(Color.White))
+				{
+					StringFormat sf = new StringFormat
 					{
-						// Get the marker position
-						int markerX = tobj.getScreenX(width);
-						int markerY = tobj.getScreenY(height);
+						Alignment = StringAlignment.Center,
+						LineAlignment = StringAlignment.Center
+					};
+					g.DrawString("<- Back", backFont, backTextBrush, backBoxRect, sf);
+				}
 
-						// Calculate the distance from the center of the circle to the marker
-						double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
+				// Draw the ID label
+				using (Font labelFont = new Font("Arial", 24, FontStyle.Bold))
+				using (Brush labelBrush = new SolidBrush(Color.White))
+				{
+					// Center X-coordinate calculation for labels
+					int labelX = (this.ClientSize.Width - 100) / 2;
 
+					// ID Label
+					g.DrawString("ID: " + currPatient.mac, labelFont, labelBrush, labelX, 100);
 
+					// Name Label
+					g.DrawString("Name: " + currPatient.name, labelFont, labelBrush, labelX, 200);
 
-						// Calculate the angle of the marker
-						double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
-						if (angle < 0) angle += 360; // Convert angle to 0-360 range
-
-						// Determine which arc the marker is in
-						int selectedQuadrant = (int)(angle / 90) % 4;
-
-						// Highlight the selected quadrant
-						g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
-
-						// Display patient names based on the marker ID
-						string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
-														tobj.SymbolID == 2 ? patientNamesMarker2 :
-														tobj.SymbolID == 3 ? patientNamesMarker3 : null;
-
+					// Score Label
+					g.DrawString("Score: " + currPatient.score, labelFont, labelBrush, labelX, 300);
+				}
 
 
-
-						if (currentPatientNames != null)
+				// Draw TUIO Marker cursors last to bring them "above" other controls
+				if (objectList.Count > 0)
+				{
+					lock (objectList)
+					{
+						foreach (TuioObject tobj in objectList.Values)
 						{
-							selectedPatient = currentPatientNames[selectedQuadrant];
+							// Get marker position and draw markers
+							int markerX = tobj.getScreenX(width);
+							int markerY = tobj.getScreenY(height);
 
-							g.FillRectangle(new SolidBrush(Color.DeepSkyBlue), new Rectangle(0, 5, selectedPatient.Length * 11, 30));
-							g.DrawString(currentPatientNames[selectedQuadrant], font, Brushes.White,
-										 new Point(0, 8));
+							// Calculate angle and position
+							double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
+							double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
+							if (angle < 0) angle += 360;
 
-							if (flag > 0)
+							// Draw TUIO Marker on top
+							int ox = tobj.getScreenX(width);
+							int oy = tobj.getScreenY(height);
+							int size = height / 10;
+
+
+
+
+							if (backBoxRect.Contains(markerX, markerY))
 							{
-								g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, selectedPatient.Length * 18, 30));
-								g.DrawString(prevP + " selected", font, Brushes.White,
-											 new Point(230, 70));
-								flag++;
-								if (flag > 100)
+								// Check if the rotation angle is close to 90 degrees
+								if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280)) // Adjust threshold as needed
 								{
 									flag = 0;
 								}
-
 							}
 
 
-							if ((tobj.Angle * (180.0 / Math.PI) >= 77 && tobj.Angle * (180.0 / Math.PI) < 280))
-							{
-								if (prevP != selectedPatient)
-								{
 
-									prevP = selectedPatient;
-									flag = 1;
-									sendSocket(tobj);
 
-								}
 
-							}
 
+							g.TranslateTransform(ox, oy);
+							g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
+							g.TranslateTransform(-ox, -oy);
+
+							g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
+
+							g.TranslateTransform(ox, oy);
+							g.RotateTransform(-1 * (float)(tobj.Angle / Math.PI * 180.0f));
+							g.TranslateTransform(-ox, -oy);
+
+							g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
 						}
-
-
-
-
-						// Existing object rendering logic
-						int ox = tobj.getScreenX(width);
-						int oy = tobj.getScreenY(height);
-						int size = height / 10;
-
-						g.TranslateTransform(ox, oy);
-						g.RotateTransform((float)(tobj.Angle / Math.PI * 180.0f));
-						g.TranslateTransform(-ox, -oy);
-
-						g.FillRectangle(objBrush, new Rectangle(ox - size / 2, oy - size / 2, size, size));
-
-						g.TranslateTransform(ox, oy);
-						g.RotateTransform(-1 * (float)(tobj.Angle / Math.PI * 180.0f));
-						g.TranslateTransform(-ox, -oy);
-
-						g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
-
-						// Existing object image drawing logic...
 					}
 				}
+
+
+
 			}
+
+
+
+
 
 			// Draw the blobs
 			if (blobList.Count > 0)
