@@ -31,61 +31,67 @@ using TUIO;
 
 public class Patient
 {
-	public string name = "";
-	public string age = "";
-	public string score = "";
-	public string mac = "";
+    public string name = "";
+    public string age = "";
+    public string score = "";
+    public string mac = "";
 
-	public Patient(string name, string age, string score, string mac)
-	{
-		this.name = name;
-		this.age = age;
-		this.score = score;
-		this.mac = mac;
-	}
+    public Patient(string name, string age, string score, string mac)
+    {
+        this.name = name;
+        this.age = age;
+        this.score = score;
+        this.mac = mac;
+    }
 
-	public Patient()
+    public Patient()
     {
 
     }
 }
 
+public class Patient
+{
+	public string name = "";
+	public string age = "";
+	public string score = "";
+	public string mac = "";
 
 
 public class TuioDemo : Form, TuioListener
 {
-	private TuioClient client;
-	private Dictionary<long, TuioObject> objectList;
-	private Dictionary<long, TuioCursor> cursorList;
-	private Dictionary<long, TuioBlob> blobList;
+    private TuioClient client;
+    private Dictionary<long, TuioObject> objectList;
+    private Dictionary<long, TuioCursor> cursorList;
+    private Dictionary<long, TuioBlob> blobList;
 
-	public static int width, height;
-	private int screen_width = Screen.PrimaryScreen.Bounds.Width;
-	private int screen_height = Screen.PrimaryScreen.Bounds.Height;
-	private int w_top = 0;
-	private int w_width = 640;
-	private int w_height = 480;
-	private int w_left = 0;
-	public int prev_id = -1;
-	private bool fullscreen;
-	private bool verbose;
+    public static int width, height;
+    private int screen_width = Screen.PrimaryScreen.Bounds.Width;
+    private int screen_height = Screen.PrimaryScreen.Bounds.Height;
+    private int w_top = 0;
+    private int w_width = 640;
+    private int w_height = 480;
+    private int w_left = 0;
+    public int prev_id = -1;
+    private bool fullscreen;
+    private bool verbose;
 
-	public string serverIP = "localhost"; // IP address of the Python server
-	public int port = 8000;               // Port number matching the Python server
-	int flag = 0;
-	Font font = new Font("Arial", 15.0f);
-	SolidBrush fntBrush = new SolidBrush(Color.White);
-	SolidBrush bgrBrush = new SolidBrush(Color.Black);
-	SolidBrush curBrush = new SolidBrush(Color.Yellow);
-	SolidBrush objBrush = new SolidBrush(Color.Purple);
-	SolidBrush blbBrush = new SolidBrush(Color.Red);
-	Pen curPen = new Pen(new SolidBrush(Color.Blue), 1);
-	private string objectImagePath;
-	private string backgroundImagePath;
-	TcpClient client1;
-	NetworkStream stream;
-	string title = "PTRH-HCI";
-	string prevP = "";
+    public string serverIP = "localhost"; // IP address of the Python server
+    public int port = 8000;               // Port number matching the Python server
+    int flag = 0;
+    Font font = new Font("Arial", 15.0f);
+    SolidBrush fntBrush = new SolidBrush(Color.White);
+    SolidBrush bgrBrush = new SolidBrush(Color.Black);
+    SolidBrush curBrush = new SolidBrush(Color.Yellow);
+    SolidBrush objBrush = new SolidBrush(Color.Purple);
+    SolidBrush blbBrush = new SolidBrush(Color.Red);
+    Pen curPen = new Pen(new SolidBrush(Color.Blue), 1);
+    private string objectImagePath;
+    private string backgroundImagePath;
+    TcpClient client1;
+    NetworkStream stream;
+    string title = "PTRH-HCI";
+    string prevP = "";
 
 	bool patient = false;
 	bool doctor = false;
@@ -103,204 +109,204 @@ public class TuioDemo : Form, TuioListener
 
 
 
-	
 
-	private string selectedPatient;
 
-	public TuioDemo(int port)
-	{
-		verbose = false;
-		fullscreen = false;
-		width = w_width;
+    private string selectedPatient;
+
+    public TuioDemo(int port)
+    {
+        verbose = false;
+        fullscreen = false;
+        width = w_width;
+        height = w_height;
 		height = w_height;
 
-		this.ClientSize = new System.Drawing.Size(width, height);
-		this.Name = "TuioDemo";
-		this.Text = title;
+        this.ClientSize = new System.Drawing.Size(width, height);
+        this.Name = "TuioDemo";
+        this.Text = title;
 
-		this.Closing += new CancelEventHandler(Form_Closing);
-		this.KeyDown += new KeyEventHandler(Form_KeyDown);
+        this.Closing += new CancelEventHandler(Form_Closing);
+        this.KeyDown += new KeyEventHandler(Form_KeyDown);
 
-		this.SetStyle(ControlStyles.AllPaintingInWmPaint |
-						ControlStyles.UserPaint |
-						ControlStyles.DoubleBuffer, true);
+        this.SetStyle(ControlStyles.AllPaintingInWmPaint |
+                        ControlStyles.UserPaint |
+                        ControlStyles.DoubleBuffer, true);
 
-		objectList = new Dictionary<long, TuioObject>(128);
-		cursorList = new Dictionary<long, TuioCursor>(128);
-		blobList = new Dictionary<long, TuioBlob>(128);
+        objectList = new Dictionary<long, TuioObject>(128);
+        cursorList = new Dictionary<long, TuioCursor>(128);
+        blobList = new Dictionary<long, TuioBlob>(128);
 
-		client = new TuioClient(port);
-		client.addTuioListener(this);
+        client = new TuioClient(port);
+        client.addTuioListener(this);
 
-		client.connect();
+        client.connect();
 
-		// Create a TCP/IP socket
-		client1 = new TcpClient(serverIP, 8000);
-		// Get the stream to send data
-		stream = client1.GetStream();
+        // Create a TCP/IP socket
+        client1 = new TcpClient(serverIP, 8000);
+        // Get the stream to send data
+        stream = client1.GetStream();
 
-	}
+    }
 
-	private void Form_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
-	{
+    private void Form_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
+    {
 
-		if (e.KeyData == Keys.F1)
-		{
-			if (fullscreen == false)
-			{
-
-				width = screen_width;
-				height = screen_height;
-
-				w_left = this.Left;
-				w_top = this.Top;
-
-				this.FormBorderStyle = FormBorderStyle.None;
-				this.Left = 0;
-				this.Top = 0;
-				this.Width = screen_width;
-				this.Height = screen_height;
-
-				fullscreen = true;
-			}
-			else
-			{
-
-				width = w_width;
-				height = w_height;
-
-				this.FormBorderStyle = FormBorderStyle.Sizable;
-				this.Left = w_left;
-				this.Top = w_top;
-				this.Width = w_width;
-				this.Height = w_height;
-
-				fullscreen = false;
-			}
-		}
-		else if (e.KeyData == Keys.Escape)
-		{
-			// Close everything
-			stream.Close();
-			client1.Close();
-			this.Close();
-
-		}
-		else if (e.KeyData == Keys.V)
-		{
-			verbose = !verbose;
-		}
-
-		if (e.KeyData == Keys.P)
-		{
-			receiveSocket();
-		}
-
-	}
-
-	private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-	{
-		client.removeTuioListener(this);
-
-		client.disconnect();
-		System.Environment.Exit(0);
-	}
-
-	public void addTuioObject(TuioObject o)
-	{
-		lock (objectList)
-		{
-			objectList.Add(o.SessionID, o);
-		}
-		if (verbose) Console.WriteLine("add obj " + o.SymbolID + " (" + o.SessionID + ") " + o.X + " " + o.Y + " " + o.Angle);
-	}
-
-	public void updateTuioObject(TuioObject o)
-	{
-
-		if (verbose) Console.WriteLine("set obj " + o.SymbolID + " " + o.SessionID + " " + o.X + " " + o.Y + " " + o.Angle + " " + o.MotionSpeed + " " + o.RotationSpeed + " " + o.MotionAccel + " " + o.RotationAccel);
-	}
-
-	public void removeTuioObject(TuioObject o)
-	{
-		lock (objectList)
-		{
-			objectList.Remove(o.SessionID);
-		}
-		if (verbose) Console.WriteLine("del obj " + o.SymbolID + " (" + o.SessionID + ")");
-	}
-
-	public void addTuioCursor(TuioCursor c)
-	{
-		lock (cursorList)
-		{
-			cursorList.Add(c.SessionID, c);
-		}
-		if (verbose) Console.WriteLine("add cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y);
-	}
-
-	public void updateTuioCursor(TuioCursor c)
-	{
-		if (verbose) Console.WriteLine("set cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y + " " + c.MotionSpeed + " " + c.MotionAccel);
-	}
-
-	public void removeTuioCursor(TuioCursor c)
-	{
-		lock (cursorList)
-		{
-			cursorList.Remove(c.SessionID);
-		}
-		if (verbose) Console.WriteLine("del cur " + c.CursorID + " (" + c.SessionID + ")");
-	}
-
-	public void addTuioBlob(TuioBlob b)
-	{
-		lock (blobList)
-		{
-			blobList.Add(b.SessionID, b);
-		}
-		if (verbose) Console.WriteLine("add blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area);
-	}
-
-	public void updateTuioBlob(TuioBlob b)
-	{
-
-		if (verbose) Console.WriteLine("set blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area + " " + b.MotionSpeed + " " + b.RotationSpeed + " " + b.MotionAccel + " " + b.RotationAccel);
-	}
-
-	public void removeTuioBlob(TuioBlob b)
-	{
-		lock (blobList)
-		{
-			blobList.Remove(b.SessionID);
-		}
-		if (verbose) Console.WriteLine("del blb " + b.BlobID + " (" + b.SessionID + ")");
-	}
-
-	public void refresh(TuioTime frameTime)
-	{
-		receiveSocket();
-		Invalidate();
-	}
-
-	protected override void OnPaintBackground(PaintEventArgs pevent)
-	{
-		// Getting the graphics object
-		Graphics g = pevent.Graphics;
-
-
-		// Draw the background
-		g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
-
-		if(patient)
+        if (e.KeyData == Keys.F1)
         {
-			g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, logPatient.name.Length * 40, 30));
-			g.DrawString("welcome " + logPatient.name, font, Brushes.White,
-						 new Point(230, 70));
-			g.DrawString("your score: " + logPatient.score, font, Brushes.White,
-						 new Point(230, 100));
+            if (fullscreen == false)
+            {
+
+                width = screen_width;
+                height = screen_height;
+
+                w_left = this.Left;
+                w_top = this.Top;
+
+                this.FormBorderStyle = FormBorderStyle.None;
+                this.Left = 0;
+                this.Top = 0;
+                this.Width = screen_width;
+                this.Height = screen_height;
+
+                fullscreen = true;
+            }
+            else
+            {
+
+                width = w_width;
+                height = w_height;
+
+                this.FormBorderStyle = FormBorderStyle.Sizable;
+                this.Left = w_left;
+                this.Top = w_top;
+                this.Width = w_width;
+                this.Height = w_height;
+
+                fullscreen = false;
+            }
+        }
+        else if (e.KeyData == Keys.Escape)
+        {
+            // Close everything
+            stream.Close();
+            client1.Close();
+            this.Close();
+
+        }
+        else if (e.KeyData == Keys.V)
+        {
+            verbose = !verbose;
+        }
+        if (e.KeyData == Keys.P)
+        {
+            receiveSocket();
+        }
 		}
-        else if(doctor)
+
+    }
+
+    private void Form_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+        client.removeTuioListener(this);
+
+        client.disconnect();
+        System.Environment.Exit(0);
+    }
+
+    public void addTuioObject(TuioObject o)
+    {
+        lock (objectList)
+        {
+            objectList.Add(o.SessionID, o);
+        }
+        if (verbose) Console.WriteLine("add obj " + o.SymbolID + " (" + o.SessionID + ") " + o.X + " " + o.Y + " " + o.Angle);
+    }
+
+    public void updateTuioObject(TuioObject o)
+    {
+
+        if (verbose) Console.WriteLine("set obj " + o.SymbolID + " " + o.SessionID + " " + o.X + " " + o.Y + " " + o.Angle + " " + o.MotionSpeed + " " + o.RotationSpeed + " " + o.MotionAccel + " " + o.RotationAccel);
+    }
+
+    public void removeTuioObject(TuioObject o)
+    {
+        lock (objectList)
+        {
+            objectList.Remove(o.SessionID);
+        }
+        if (verbose) Console.WriteLine("del obj " + o.SymbolID + " (" + o.SessionID + ")");
+    }
+
+    public void addTuioCursor(TuioCursor c)
+    {
+        lock (cursorList)
+        {
+            cursorList.Add(c.SessionID, c);
+        }
+        if (verbose) Console.WriteLine("add cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y);
+    }
+
+    public void updateTuioCursor(TuioCursor c)
+    {
+        if (verbose) Console.WriteLine("set cur " + c.CursorID + " (" + c.SessionID + ") " + c.X + " " + c.Y + " " + c.MotionSpeed + " " + c.MotionAccel);
+    }
+
+    public void removeTuioCursor(TuioCursor c)
+    {
+        lock (cursorList)
+        {
+            cursorList.Remove(c.SessionID);
+        }
+        if (verbose) Console.WriteLine("del cur " + c.CursorID + " (" + c.SessionID + ")");
+    }
+
+    public void addTuioBlob(TuioBlob b)
+    {
+        lock (blobList)
+        {
+            blobList.Add(b.SessionID, b);
+        }
+        if (verbose) Console.WriteLine("add blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area);
+    }
+
+    public void updateTuioBlob(TuioBlob b)
+    {
+
+        if (verbose) Console.WriteLine("set blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area + " " + b.MotionSpeed + " " + b.RotationSpeed + " " + b.MotionAccel + " " + b.RotationAccel);
+    }
+
+    public void removeTuioBlob(TuioBlob b)
+    {
+        lock (blobList)
+        {
+            blobList.Remove(b.SessionID);
+        }
+        if (verbose) Console.WriteLine("del blb " + b.BlobID + " (" + b.SessionID + ")");
+    }
+    public void refresh(TuioTime frameTime)
+    {
+        receiveSocket();
+        Invalidate();
+    }
+	}
+
+    protected override void OnPaintBackground(PaintEventArgs pevent)
+    {
+        // Getting the graphics object
+        Graphics g = pevent.Graphics;
+
+
+        // Draw the background
+        g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
+        if (patient)
+        {
+            g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, logPatient.name.Length * 40, 30));
+            g.DrawString("welcome " + logPatient.name, font, Brushes.White,
+                         new Point(230, 70));
+            g.DrawString("your score: " + logPatient.score, font, Brushes.White,
+                         new Point(230, 100));
+        }
+        else if (doctor)
         {
 			int menuRadius = height / 4;  // Adjust size based on your design
 			Point center = new Point(width / 2, height / 2);
@@ -417,7 +423,21 @@ public class TuioDemo : Form, TuioListener
 							}
 
 
+                // Draw TUIO Marker cursors last to bring them "above" other controls
+                if (objectList.Count > 0)
+                {
+                    lock (objectList)
+                    {
+                        foreach (TuioObject tobj in objectList.Values)
+                        {
+                            // Get marker position and draw markers
+                            int markerX = tobj.getScreenX(width);
+                            int markerY = tobj.getScreenY(height);
 
+                            // Calculate angle and position
+                            double distanceFromCenter = Math.Sqrt(Math.Pow(markerX - center.X, 2) + Math.Pow(markerY - center.Y, 2));
+                            double angle = Math.Atan2(markerY - center.Y, markerX - center.X) * (180.0 / Math.PI);
+                            if (angle < 0) angle += 360;
 
 							// Existing object rendering logic
 							int ox = tobj.getScreenX(width);
@@ -570,112 +590,113 @@ public class TuioDemo : Form, TuioListener
 			}
 		}
 
-		
+
+    }
 	}
 
 
 
 
 
-	public static void Main(String[] argv)
-	{
-		int port = 0;
-		switch (argv.Length)
-		{
-			case 1:
-				port = int.Parse(argv[0], null);
-				if (port == 0) goto default;
-				break;
-			case 0:
-				port = 3333;
-				break;
-			default:
-				Console.WriteLine("usage: mono TuioDemo [port]");
-				System.Environment.Exit(0);
-				break;
-		}
+    public static void Main(String[] argv)
+    {
+        int port = 0;
+        switch (argv.Length)
+        {
+            case 1:
+                port = int.Parse(argv[0], null);
+                if (port == 0) goto default;
+                break;
+            case 0:
+                port = 3333;
+                break;
+            default:
+                Console.WriteLine("usage: mono TuioDemo [port]");
+                System.Environment.Exit(0);
+                break;
+        }
 
-		TuioDemo app = new TuioDemo(port);
-		Application.Run(app);
-	}
+        TuioDemo app = new TuioDemo(port);
+        Application.Run(app);
+    }
 
-	public void sendSocket(TuioObject markerData)
-	{
-		try
-		{
-			// Use selectedPatient variable directly
-			if (!string.IsNullOrEmpty(selectedPatient))
-			{
-				// Prepare the message to send
-				string messageToSend = $"Selected Patient: {selectedPatient}";
+    public void sendSocket(TuioObject markerData)
+    {
+        try
+        {
+            // Use selectedPatient variable directly
+            if (!string.IsNullOrEmpty(selectedPatient))
+            {
+                // Prepare the message to send
+                string messageToSend = $"Selected Patient: {selectedPatient}";
 
-				// Convert the message to a byte array
-				byte[] data = Encoding.UTF8.GetBytes(messageToSend);
+                // Convert the message to a byte array
+                byte[] data = Encoding.UTF8.GetBytes(messageToSend);
 
-				// Send the message to the server
-				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", messageToSend);
-			}
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Exception: {0}", e);
-		}
-	}
+                // Send the message to the server
+                stream.Write(data, 0, data.Length);
+                Console.WriteLine("Sent: {0}", messageToSend);
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Exception: {0}", e);
+        }
+    }
 
-
-	public void receiveSocket()
-	{
-		try
-		{
-			// Check if data is available to read
-			if (stream != null && stream.DataAvailable)
-			{
-				// Buffer to store the incoming data
-				byte[] data = new byte[256];
-				StringBuilder responseData = new StringBuilder();
+    public void receiveSocket()
+    {
+        try
+        {
+            // Check if data is available to read
+            if (stream != null && stream.DataAvailable)
+            {
+                // Buffer to store the incoming data
+                byte[] data = new byte[256];
+                StringBuilder responseData = new StringBuilder();
+                int bytes = stream.Read(data, 0, data.Length);
 				int bytes = stream.Read(data, 0, data.Length);
 
-				// Decode the data into a string
-				responseData.Append(Encoding.UTF8.GetString(data, 0, bytes));
-				Console.WriteLine("Received: {0}", responseData.ToString());
+                // Decode the data into a string
+                responseData.Append(Encoding.UTF8.GetString(data, 0, bytes));
+                Console.WriteLine("Received: {0}", responseData.ToString());
+                // Process the received message
+                string res = responseData.ToString();
 
-				// Process the received message
-				string res = responseData.ToString();
+                string[] parts = res.Split(',');
 
-				string[] parts = res.Split(',');
-
-				if(parts.Length == 1)
+                if (parts.Length == 1)
                 {
-					doctor = true;
+                    doctor = true;
                 }
                 else
                 {
-					for (int i = 0; i < patients.Count; i++)
-					{
-						if (patients[i].mac == parts[0])
-						{
-							logPatient = patients[i];
-							logPatient.score = parts[1];
-							patient = true;
-							break;
-						}
-					}
-				}
-
-				
+                    for (int i = 0; i < patients.Count; i++)
+                    {
+                        if (patients[i].mac == parts[0])
+                        {
+                            logPatient = patients[i];
+                            logPatient.score = parts[1];
+                            patient = true;
+                            break;
+                        }
+                    }
+                }
 
 
 
 
 
 
-			}
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Exception: {0}", e);
-		}
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Exception: {0}", e);
+        }
+    }
 	}
 
 }
