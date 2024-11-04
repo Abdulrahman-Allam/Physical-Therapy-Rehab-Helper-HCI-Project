@@ -34,13 +34,6 @@ public class Patient
 	public string score = "";
 	public string mac = "";
 
-	public Patient(string name, string age, string score, string mac)
-	{
-		this.name = name;
-		this.age = age;
-		this.score = score;
-		this.mac = mac;
-	}
 
 	public Patient()
 	{
@@ -99,6 +92,20 @@ public class TuioDemo : Form, TuioListener
 		new Patient("Abuelwafa", "21", "200", "6F:F2:1E:3F:B2:BB"),
 	};
 	Patient logPatient = new Patient();
+	bool patient = false;
+	bool doctor = false;
+	Patient currPatient;
+	List<Patient> patients = new List<Patient>
+	{
+		new Patient("Hamza","19","600","A0:D0:5B:27:31:17"),
+		new Patient("DHOM", "21", "555", "A0:D0:5B:27:31:12"),
+		new Patient("Abood", "20", "500", "A0:D0:5B:27:31:13"),
+		new Patient("Abdo", "21", "400", "A0:D0:5B:27:31:14"),
+		new Patient("Assem", "24", "300", "A0:D0:5B:27:31:15"),
+		new Patient("Seif", "21", "200", "A0:D0:5B:27:31:16"),
+	};
+	Patient logPatient = new Patient();
+>>>>>>>>> Temporary merge branch 2
 
 
 
@@ -129,11 +136,10 @@ public class TuioDemo : Form, TuioListener
 		blobList = new Dictionary<long, TuioBlob>(128);
 
 		client = new TuioClient(port);
-		client.addTuioListener(this);
-
-		client.connect();
-
-		// Create a TCP/IP socket
+		if (e.KeyData == Keys.F1)
+		{
+			if (fullscreen == false)
+			{
 		client1 = new TcpClient(serverIP, 8000);
 		// Get the stream to send data
 		stream = client1.GetStream();
@@ -143,10 +149,11 @@ public class TuioDemo : Form, TuioListener
 	private void Form_KeyDown(object sender, System.Windows.Forms.KeyEventArgs e)
 	{
 
-		if (e.KeyData == Keys.F1)
-		{
-			if (fullscreen == false)
-			{
+        if (e.KeyData == Keys.F1)
+        {
+<<<<<<<<< Temporary merge branch 1
+            if (fullscreen == false)
+            {
 
 				width = screen_width;
 				height = screen_height;
@@ -170,20 +177,6 @@ public class TuioDemo : Form, TuioListener
 
 				this.FormBorderStyle = FormBorderStyle.Sizable;
 				this.Left = w_left;
-				this.Top = w_top;
-				this.Width = w_width;
-				this.Height = w_height;
-
-				fullscreen = false;
-			}
-		}
-		else if (e.KeyData == Keys.Escape)
-		{
-			// Close everything
-			stream.Close();
-			client1.Close();
-			this.Close();
-
 		}
 		else if (e.KeyData == Keys.V)
 		{
@@ -193,6 +186,20 @@ public class TuioDemo : Form, TuioListener
 		if (e.KeyData == Keys.P)
 		{
 			receiveSocket();
+		}
+			stream.Close();
+			client1.Close();
+			this.Close();
+
+        }
+        else if (e.KeyData == Keys.V)
+        {
+            verbose = !verbose;
+        }
+        if (e.KeyData == Keys.P)
+        {
+            receiveSocket();
+        }
 		}
 
 	}
@@ -253,20 +260,6 @@ public class TuioDemo : Form, TuioListener
 	}
 
 	public void addTuioBlob(TuioBlob b)
-	{
-		lock (blobList)
-		{
-			blobList.Add(b.SessionID, b);
-		}
-		if (verbose) Console.WriteLine("add blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area);
-	}
-
-	public void updateTuioBlob(TuioBlob b)
-	{
-
-		if (verbose) Console.WriteLine("set blb " + b.BlobID + " (" + b.SessionID + ") " + b.X + " " + b.Y + " " + b.Angle + " " + b.Width + " " + b.Height + " " + b.Area + " " + b.MotionSpeed + " " + b.RotationSpeed + " " + b.MotionAccel + " " + b.RotationAccel);
-	}
-
 	public void removeTuioBlob(TuioBlob b)
 	{
 		lock (blobList)
@@ -286,8 +279,8 @@ public class TuioDemo : Form, TuioListener
 	{
 		// Getting the graphics object
 		Graphics g = pevent.Graphics;
-
-
+        }
+        if (verbose) Console.WriteLine("del blb " + b.BlobID + " (" + b.SessionID + ")");
 		// Draw the background
 		g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
 
@@ -303,13 +296,27 @@ public class TuioDemo : Form, TuioListener
 		{
 			int menuRadius = height / 4;  // Adjust size based on your design
 			Point center = new Point(width / 2, height / 2);
+        // Draw the background
+        g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
+        if (patient)
+        {
+            g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, logPatient.name.Length * 40, 30));
+            g.DrawString("welcome " + logPatient.name, font, Brushes.White,
+                         new Point(230, 70));
+            g.DrawString("your score: " + logPatient.score, font, Brushes.White,
+                         new Point(230, 100));
+        }
+        else if (doctor)
+				// Draw the cursor path
+				if (cursorList.Count > 0)
+				{
+					lock (cursorList)
+					{
+						foreach (TuioCursor tcur in cursorList.Values)
+						{
+							List<TuioPoint> path = tcur.Path;
+							TuioPoint current_point = path[0];
 
-			// Define patient names based on marker ID
-			string[] patientNamesMarker1 = { patients[0].name, patients[1].name, patients[2].name, patients[3].name };
-			string[] patientNamesMarker2 = { patients[4].name, patients[5].name, "Kareem Karam", "Tamer Hosny" };
-			string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
-
-			if (flag == 0)
 			{
 				// Draw the background
 				g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
@@ -531,27 +538,6 @@ public class TuioDemo : Form, TuioListener
 							g.DrawString(tobj.SymbolID + "", font, fntBrush, new PointF(ox - 10, oy - 10));
 						}
 					}
-				}
-
-
-
-			}
-
-
-
-
-
-			// Draw the blobs
-			if (blobList.Count > 0)
-			{
-				lock (blobList)
-				{
-					foreach (TuioBlob tblb in blobList.Values)
-					{
-						int bx = tblb.getScreenX(width);
-						int by = tblb.getScreenY(height);
-						float bw = tblb.Width * width;
-						float bh = tblb.Height * height;
 
 						g.TranslateTransform(bx, by);
 						g.RotateTransform((float)(tblb.Angle / Math.PI * 180.0f));
@@ -568,14 +554,14 @@ public class TuioDemo : Form, TuioListener
 				}
 			}
 		}
-
-
+                        g.RotateTransform((float)(tblb.Angle / Math.PI * 180.0f));
+                        g.TranslateTransform(-bx, -by);
 	}
-
-
-
-
-
+					g.FillEllipse(blbBrush, bx - bw / 2, by - bh / 2, bw, bh);
+                        g.TranslateTransform(bx, by);
+                        g.RotateTransform(-1 * (float)(tblb.Angle / Math.PI * 180.0f));
+                        g.TranslateTransform(-bx, -by);
+					g.TranslateTransform(-bx, -by);
 	public static void Main(String[] argv)
 	{
 		int port = 0;
@@ -593,6 +579,20 @@ public class TuioDemo : Form, TuioListener
 				System.Environment.Exit(0);
 				break;
 		}
+        switch (argv.Length)
+        {
+            case 1:
+                port = int.Parse(argv[0], null);
+                if (port == 0) goto default;
+                break;
+            case 0:
+                port = 3333;
+                break;
+            default:
+                Console.WriteLine("usage: mono TuioDemo [port]");
+                System.Environment.Exit(0);
+                break;
+        }
 
 		TuioDemo app = new TuioDemo(port);
 		Application.Run(app);
@@ -608,20 +608,6 @@ public class TuioDemo : Form, TuioListener
 				// Prepare the message to send
 				string messageToSend = $"Selected Patient: {selectedPatient}";
 
-				// Convert the message to a byte array
-				byte[] data = Encoding.UTF8.GetBytes(messageToSend);
-
-				// Send the message to the server
-				stream.Write(data, 0, data.Length);
-				Console.WriteLine("Sent: {0}", messageToSend);
-			}
-		}
-		catch (Exception e)
-		{
-			Console.WriteLine("Exception: {0}", e);
-		}
-	}
-
 
 	public void receiveSocket()
 	{
@@ -634,16 +620,16 @@ public class TuioDemo : Form, TuioListener
 				byte[] data = new byte[256];
 				StringBuilder responseData = new StringBuilder();
 				int bytes = stream.Read(data, 0, data.Length);
+	}
 
-				// Decode the data into a string
-				responseData.Append(Encoding.UTF8.GetString(data, 0, bytes));
-				Console.WriteLine("Received: {0}", responseData.ToString());
-
-				// Process the received message
-				string res = responseData.ToString();
-
-				string[] parts = res.Split(',');
-
+    public void receiveSocket()
+    {
+        try
+        {
+            // Check if data is available to read
+            if (stream != null && stream.DataAvailable)
+            {
+                // Buffer to store the incoming data
 				if (parts[0] == "A0:D0:5B:27:31:17")
 				{
 					doctor = true;
@@ -675,6 +661,20 @@ public class TuioDemo : Form, TuioListener
 		{
 			Console.WriteLine("Exception: {0}", e);
 		}
+	}
+
+
+
+
+
+
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Exception: {0}", e);
+        }
+    }
 	}
 
 }
