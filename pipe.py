@@ -1,6 +1,4 @@
-#!pip install dollarpy
-#!pip install mediapipe
-
+import pickle
 import mediapipe as mp # Import mediapipe
 import cv2 # Import opencv
 from dollarpy import Recognizer, Template, Point
@@ -9,10 +7,6 @@ mp_drawing = mp.solutions.drawing_utils # Drawing helpers
 mp_drawing_styles = mp.solutions.drawing_styles
 
 mp_holistic = mp.solutions.holistic # Mediapipe Solutions
-
-templates=[] #list of templates for $1 training
-
-
 
 
 def getPoints(videoURL,label):
@@ -93,45 +87,16 @@ def getPoints(videoURL,label):
     print(label)
     return points
 
-#vid = "../dataset/CatCow-Wrong-1.mp4"
-#points = getPoints(vid,"Wrong CatCow Movement") 
-#print(points)
-
-templates=[] #list of templates for training
-
-#Correct CatCow
-vid = "../dataset/CatCow-Correct-1.mp4"
-points = getPoints(vid,"CatCow Correct") 
-tmpl = Template('CatCow Correct', points)
-templates.append(tmpl)
-
-#Wrong CatCow
-vid = "../dataset/CatCow-Wrong-1.mp4"
-points = getPoints(vid,"CatCow Wrong") 
-tmpl = Template('CatCow Wrong', points)
-templates.append(tmpl)
-
-#Correct FlagPole
-vid = "../dataset/Dataset-Kyphosis- All Seated/Kyphosis-All Seated ex1-v1.mp4"
-points = getPoints(vid,"FlagPole Correct") 
-tmpl = Template('FlagPole Correct', points)
-templates.append(tmpl)
-
-#Correct CrissCross
-vid = "../dataset/Dataset-Kyphosis- All Seated/Kyphosis-All Seated ex2-v1.mp4"
-points = getPoints(vid,"CrissCross Correct") 
-tmpl = Template('CrissCross Correct', points)
-templates.append(tmpl)
+# Load the recognizer model from the file
+with open('recognizer_model.pkl', 'rb') as file:
+    recognizer = pickle.load(file)
 
 #TEST
-vid = "../dataset/CatCow-Correct-4.mp4"
-points = getPoints(vid,"CatCow Correct") 
-
-
+vid = "../dataset/CatCow-Wrong-4.mp4" # use "/videos/"" + username
+points = getPoints(vid,"Unknown") # keep as unknown
 
 import time 
 start = time.time()
-recognizer = Recognizer(templates)
 result = recognizer.recognize(points)
 end = time.time()
 print(result[0])
