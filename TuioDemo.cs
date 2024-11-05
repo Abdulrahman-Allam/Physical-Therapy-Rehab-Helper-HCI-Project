@@ -14,7 +14,7 @@
 
 	You should have received a copy of the GNU General Public License
 	along with this program; if not, write to the Free Software
-	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+	Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USAf
 */
 
 using System;
@@ -97,6 +97,8 @@ public class TuioDemo : Form, TuioListener
 		new Patient("Seif", "21", "200", "A0:D0:5B:27:31:16"),
 		new Patient("Kenakai", "21", "200", "B0:E4:5C:37:97:1F"),
 		new Patient("Abuelwafa", "21", "200", "6F:F2:1E:3F:B2:BB"),
+		new Patient("Mia", "21", "200", "5B:FC:EA:FA:D1:62"),
+		new Patient("Khalifa", "21", "200", "4E:D3:A3:58:27:CA"),
 	};
 	Patient logPatient = new Patient();
 
@@ -291,16 +293,20 @@ public class TuioDemo : Form, TuioListener
 		// Draw the background
 		g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
 
+
 		if (patient)
 		{
-			g.FillRectangle(new SolidBrush(Color.Red), new Rectangle(230, 70, logPatient.name.Length * 40, 30));
-			g.DrawString("welcome " + logPatient.name, font, Brushes.White,
-						 new Point(230, 70));
-			g.DrawString("your score: " + logPatient.score, font, Brushes.White,
-						 new Point(230, 100));
+			Bitmap img = new Bitmap("showScore.png");
+			g.DrawImage(img, 0, 0, 650, 500);
+
+			g.DrawString("welcome " + logPatient.name, new Font("Arial", 20.0f), Brushes.White,
+						 new Point(215, 40));
+			g.DrawString("your score: " + logPatient.score, new Font("Arial", 20.0f), Brushes.White,
+						 new Point(215, 240));
 		}
 		else if (doctor)
 		{
+
 			int menuRadius = height / 4;  // Adjust size based on your design
 			Point center = new Point(width / 2, height / 2);
 
@@ -313,6 +319,8 @@ public class TuioDemo : Form, TuioListener
 			{
 				// Draw the background
 				g.FillRectangle(bgrBrush, new Rectangle(0, 0, width, height));
+				Bitmap img = new Bitmap("doc3.png");
+				g.DrawImage(img, 0, 0, 650, 500);
 
 				// Draw the cursor path
 				if (cursorList.Count > 0)
@@ -444,8 +452,10 @@ public class TuioDemo : Form, TuioListener
 			{
 				this.StartPosition = FormStartPosition.CenterScreen;
 				this.BackColor = Color.Black;
+				Bitmap img = new Bitmap("doc.png");
+				g.DrawImage(img, 0, 0, 650, 500);
 				Rectangle backBoxRect = new Rectangle(10, 10, 150, this.Height - 60);
-				using (Brush backBoxBrush = new SolidBrush(Color.Green))
+				using (Brush backBoxBrush = new SolidBrush(Color.Black))
 				{
 					g.FillRectangle(backBoxBrush, backBoxRect);
 				}
