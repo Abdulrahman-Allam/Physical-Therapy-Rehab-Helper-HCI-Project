@@ -11,7 +11,14 @@ import cv2
 from dollarpy import Recognizer, Template, Point
 import platform
 
-maclist = ['B0:E4:5C:37:97:1F', '6F:F2:1E:3F:B2:BB', 'A0:D0:5B:27:31:17']
+macdic = [
+    {"mac": "6F:F2:1E:3F:B2:BB", "video": "videos\Kyphosis-All Seated ex2-v2.mp4"},
+    {"mac": "B0:E4:5C:37:97:1F", "video": "videos\CatCow-Wrong-5.mp4"},
+    {"mac": "71:3C:9B:85:A4:95", "video": "videos\Kyphosis-All Seated ex1-v4.mp4"},
+    {"mac": "D4:0E:76:81:C2:8D", "video": "videos\CatCow-Correct-5.mp4"},
+    {"mac": "5B:FC:EA:FA:D1:62", "video": "videos\Kyphosis-All Seated ex1-v4.mp4"},
+    {"mac": "4E:D3:A3:58:27:CA", "video": "videos\Kyphosis-All Seated ex2-v2.mp4"},
+]
 
 # Define mediapipe holistics
 mp_drawing = mp.solutions.drawing_utils  # Drawing helpers
@@ -124,23 +131,27 @@ async def scan_bluetooth_devices():
                 send_to_client(f"{device.address}, ")
                 break
 
-            elif device.address in maclist:
-                with open('recognizer_model.pkl', 'rb') as file:
-                    recognizer = pickle.load(file)
+            else:
+                for x in macdic:
+                    if x.get("mac") == device.address:
+                         with open('recognizer_model.pkl', 'rb') as file:
+                            recognizer = pickle.load(file)
 
-                vid = "videos/CatCow-Wrong-5.mp4"
-                points = getPoints(vid, "Unknown")
+                         vid = x.get("video")
+                         points = getPoints(vid, "Unknown")
+                         start = time.time()
+                         result = recognizer.recognize(points)
+                         end = time.time()
+                         print(result[0])
+                         print("Time taken to classify: " + str(end - start))
 
-                start = time.time()
-                result = recognizer.recognize(points)
-                end = time.time()
-                print(result[0])
-                print("Time taken to classify: " + str(end - start))
-
-                score = math.floor(result[1] * 1000)
-                print(f"this is your score: {score}")
-                send_to_client(f"{device.address},{score}")
+                         score = math.floor(result[1] * 1000)
+                         print(f"this is your score: {score}")
+                         send_to_client(f"{device.address},{score}")
+                         break
                 break
+
+               
 
     except Exception as e:
         print(f"An error occurred in Bluetooth scan: {str(e)}")
