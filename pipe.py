@@ -88,20 +88,53 @@ def getPoints(videoURL,label):
     print(label)
     return points
 
-# Load the recognizer model from the file
-with open('recognizer_model.pkl', 'rb') as file:
-    recognizer = pickle.load(file)
+#  TRAIN  #
 
-#TEST
+templates=[] #list of templates for $1 training
+
+#CatCow Correct
+vid = "../dataset/CatCow Correct 1.mp4"
+points = getPoints(vid,"CatCow Correct")
+tmpl = Template('CatCow Correct', points)
+templates.append(tmpl)
+
+#CatCow Wrong
+vid = "../dataset/CatCow Wrong 1.mp4"
+points = getPoints(vid,"CatCow Wrong")
+tmpl = Template('CatCow Wrong', points)
+templates.append(tmpl)
+
+#FlagPole
+vid = "../dataset/Kyphosis-All Seated ex1-v1.mp4"
+points = getPoints(vid,"FlagPole Correct")
+tmpl = Template('FlagPole Correct', points)
+templates.append(tmpl)
+
+#CrissCross
+vid = "../dataset/Kyphosis-All Seated ex2-v1.mp4"
+points = getPoints(vid,"CrissCross Correct")
+tmpl = Template('CrissCross Correct', points)
+templates.append(tmpl)
+
+#  TEST  #
 vid = "../dataset/CatCow-Wrong-4.mp4" # use "/videos/"" + username
 points = getPoints(vid,"Unknown") # keep as unknown
 
+# Load the recognizer model from the file
+#with open('recognizer_model.pkl', 'rb') as file:
+#    recognizer = pickle.load(file)
+
 import time
 start = time.time()
+recognizer = Recognizer(templates)
 result = recognizer.recognize(points)
 end = time.time()
 print(result[0])
 print("time taken to classify:"+ str(end-start))
+
+# Save the recognizer model to a file
+#with open('recognizer_model.pkl', 'wb') as f:
+#    pickle.dump(recognizer, f)
 
 score = math.floor(result[1] * 1000)
 
