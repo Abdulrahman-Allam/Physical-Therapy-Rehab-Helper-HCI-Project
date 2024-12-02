@@ -311,9 +311,9 @@ public class TuioDemo : Form, TuioListener
 			Point center = new Point(width / 2, height / 2);
 
 			// Define patient names based on marker ID
-			string[] patientNamesMarker1 = { patients[0].name, patients[1].name, patients[2].name, patients[3].name };
+			string[] patientNamesMarker3 = { patients[0].name, patients[1].name, patients[2].name, patients[3].name };
 			string[] patientNamesMarker2 = { patients[4].name, patients[5].name, "Kareem Karam", "Tamer Hosny" };
-			string[] patientNamesMarker3 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
+			string[] patientNamesMarker1 = { "Abdulrahman Allam", "Hamza Moustafa", "Khalid Hassan", "Ahmed Saliba" };
 
 			if (flag == 0)
 			{
@@ -382,7 +382,7 @@ public class TuioDemo : Form, TuioListener
 							g.FillPie(Brushes.GreenYellow, center.X - menuRadius, center.Y - menuRadius, menuRadius * 2, menuRadius * 2, selectedQuadrant * 90, 90);
 
 							// Display patient names based on the marker ID
-							string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker1 :
+							string[] currentPatientNames = tobj.SymbolID == 1 ? patientNamesMarker3 :
 															tobj.SymbolID == 2 ? patientNamesMarker2 :
 															tobj.SymbolID == 3 ? patientNamesMarker3 : null;
 
@@ -651,25 +651,21 @@ public class TuioDemo : Form, TuioListener
 
 				// Process the received message
 				string res = responseData.ToString();
+				Console.WriteLine(res);
+				if(res == "Abdulrahman Allam")
+                {
+					Console.WriteLine("Welcome Abulrahman");
+                }
+				
 
-				string[] parts = res.Split(',');
-
-				if (parts[0] == "A0:D0:5B:27:31:17")
+				if (res == "Abdulrahman Allam")
 				{
+					Console.WriteLine("we did it");
 					doctor = true;
 				}
 				else
 				{
-					for (int i = 0; i < patients.Count; i++)
-					{
-						if (patients[i].mac == parts[0])
-						{
-							logPatient = patients[i];
-							logPatient.score = parts[1];
-							patient = true;
-							break;
-						}
-					}
+					
 				}
 
 
